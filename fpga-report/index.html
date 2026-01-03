@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/main.css">
+    <title>FPGA原理与设计 设计报告</title>
+</head>
+<body>
+<div class="wrap-root">
+
+    <div class="wrap-cover">
+        <img src="assets/img/peiyang_university.png" alt="" class="background">
+
+        <div class="wrap-logo">
+            <img class="logo" src="assets/img/tju_blue.png" alt="天津大学 Tianjin University">
+        </div>
+
+        <div class="wrap-title">
+            <p class="course">FPGA原理与设计</p>
+            <p class="report-name">设计报告</p>
+            <p class="group">第五组</p>
+            <div class="line"></div>
+        </div>
+
+        <div class="wrap-namelist">
+            <div class="name"><p>李嘉豪</p>
+                <p>3023234059</p></div>
+            <div class="name"><p>张晨</p>
+                <p>3023234088</p></div>
+            <div class="name"><p>杨紫翔</p>
+                <p>30232340xx</p></div>
+            <div class="name"><p>施云峰</p>
+                <p>3023234002</p></div>
+            <div class="name"><p>李牧泽
+                <p>3023234060</p></div>
+            <div class="name"><p>李长龙</p>
+                <p>30232340xx</p></div>
+        </div>
+    </div>
+
+    <div class="wrap-document">
+
+        <div class="section-background" id="section-1">
+            <div class="section-header">
+                <div class="section-number">
+                    01
+                </div>
+            </div>
+            <div class="wrap-section" id="paragraph-1">
+
+                <h1 class="section-title">总体概述</h1>
+                <h2>系统设计思路</h2>
+                <div class="wrap-content">
+                    <p class="text">
+                        作业要求基于PYNQ-Z2
+                        FPGA开发板，通过按键与串口两种方式控制LED的显示方式，从而实现多种流水灯效果，并且能够将设备当前状态通过串口反馈到上位机。由于整个系统涉及到多个输入，比较复杂的状态控制，以及状态的输出，因此具有一定的复杂性。
+                        虽然将整体项目放在一个文件中整体实现在理论上来讲确实具有可行性，但是会让控制逻辑和代码高度耦合，显然会对代码的编写与功能调试产生很大的阻碍。并且小组成员没有办法同时进行开发，降低了开发效率。因此我们认为可以将整个项目进行功能划分，在不同模块中单独实现。多模块的解耦设计需要我们从面向实现设计代码转为面向接口设计，意味着只要我们事先设计好每个模块的接口，就可以实现所有开发与功能测试单独进行。通过解耦设计，使得各个功能模块的职责明确、逻辑清晰，极大简化了工程管理与代码设计。
+                        系统功能的拆分与单独模块的设计也有很多种方案。如果基于设计模式中的单一职责原则，每个模块所负责的功能必须单一，这样对于这个模块的修改将会减少对于其他模块的影响。我们将系统分为如下几个单一职责：
+                    </p>
+
+                    <div class="wrap-list" id="list1">
+                        <span>按键输入</span>
+                        <span>串口输入</span>
+                        <span>模式切换</span>
+                        <span>暂停与继续</span>
+                        <span>延时参数处理</span>
+                        <span>LED周期控制</span>
+                        <span>LED电平控制</span>
+                        <span>反馈帧准备</span>
+                        <span>串口输出</span>
+                    </div>
+
+                    <p class="text">
+                        虽然模块职责最小化能够简化模块的设计，但是如果数量过多，模块之间的衔接处理反而会增加系统的开发难度。并且在作业要求这个环境下，有些功能就是不需要进行改动的，为了扩展与变化进行的解耦在某些方面没有必要，只会让代码更加繁琐。因此在权衡了系统复杂程度，小组成员分工，功能耦合程度之后，我们将整个系统拆分成如下几个模块
+                    </p>
+
+                    <div class="wrap-list" id="list2">
+                        <span>按键事件处理</span>
+                        <span>串口接收事件与数据处理</span>
+                        <span>流水周期信号产生</span>
+                        <span>LED显示控制</span>
+                        <span>全局状态控制</span>
+                        <span>串口发送事件与数据处理</span>
+                    </div>
+
+                    <p class="text">
+                        整个项目的源文件组织结构如下
+                    </p>
+                    <div class="wrap-figure" style="margin: 0 80px 0 80px">
+                        <img class="figure" src="assets/img/files.png" alt="文件组织">
+                    </div>
+
+                </div>
+                <h2>系统架构与接口</h2>
+                <div class="wrap-content">
+                    <p class="text">
+                        对于小组多人合作开发，以及为了隔离开发过程中在调试与验证的过程中对于需求的变化，设计好每个模块对外暴露的接口显然是首先应该确定的事情。下面展示的是各个模块的接口定义以及整体框架的架构示意图。
+                    </p>
+                    <div class="wrap-figure">
+                        <img class="figure" src="assets/img/sys_strcut.png" alt="系统结构图">
+                    </div>
+                    <p class="text">
+                        上图中标注了所有模块的输入输出接口以及之间的关联关系。最外层是一个<code>top.v</code>构建的顶层模块<code>top</code>，实例化了<code>led</code>,<code>tick</code>,<code>fsm</code>,<code>key</code>,<code>uart</code>几个模块，在<code>uart</code>中，则是接着使用了
+                        <code>uartTx</code>与 <code>uartRx</code>两个收发模块。他们之间通过顶层模块的一些内部信号（图中通过红色方框表示）相连。
+
+                    </p>
+                </div>
+
+
+            </div>
+            <div class="section-tailer"></div>
+        </div>
+
+        <div class="section-background" id="section-2">
+            <div class="section-header">
+                <div class="section-number">
+                    02
+                </div>
+            </div>
+            <div class="wrap-section" id="paragraph-2">
+                <h1 class="section-title">
+                    模块功能设计
+                </h1>
+
+            </div>
+            <div class="section-tailer"></div>
+        </div>
+
+
+    </div>
+
+    <div class="wrap-tailer">
+        <p><code>powered by MekLi</code></p>
+        <p><code>source on github: <a href="https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report">https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report</a></code></p>
+    </div>
+</div>
+</body>
+</html>

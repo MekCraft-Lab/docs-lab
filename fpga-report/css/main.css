@@ -1,0 +1,20 @@
+/* CSS */
+@import url(https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css);
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap");
+
+@import url("../assets/font/font.css");
+
+@import url("cover.css");
+
+@import url("paragraph.css");
+
+@import url("tailer.css");
+
+.wrap-root {
+    position: absolute;
+    transform: translate(-50%, 0);
+    left: 50%;
+    top: 0;
+    background-color: #fff;
+    width: 800px;
+ }
