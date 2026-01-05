@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/main.css">
+    <link href="script/js/prism.js" rel="application/javascript" />
+    <link rel="stylesheet" href="css/prism.css"/>
     <title>FPGA原理与设计 设计报告</title>
 </head>
 <body>
@@ -54,9 +56,10 @@
                     <p class="text">
                         作业要求基于PYNQ-Z2
                         FPGA开发板，通过按键与串口两种方式控制LED的显示方式，从而实现多种流水灯效果，并且能够将设备当前状态通过串口反馈到上位机。由于整个系统涉及到多个输入，比较复杂的状态控制，以及状态的输出，因此具有一定的复杂性。
-                        虽然将整体项目放在一个文件中整体实现在理论上来讲确实具有可行性，但是会让控制逻辑和代码高度耦合，显然会对代码的编写与功能调试产生很大的阻碍。并且小组成员没有办法同时进行开发，降低了开发效率。因此我们认为可以将整个项目进行功能划分，在不同模块中单独实现。多模块的解耦设计需要我们从面向实现设计代码转为面向接口设计，意味着只要我们事先设计好每个模块的接口，就可以实现所有开发与功能测试单独进行。通过解耦设计，使得各个功能模块的职责明确、逻辑清晰，极大简化了工程管理与代码设计。
-                        系统功能的拆分与单独模块的设计也有很多种方案。如果基于设计模式中的单一职责原则，每个模块所负责的功能必须单一，这样对于这个模块的修改将会减少对于其他模块的影响。我们将系统分为如下几个单一职责：
+                        虽然将整体项目放在一个文件中整体实现在理论上来讲确实具有可行性，但是会让控制逻辑和代码高度耦合，显然会对代码的编写与功能调试产生很大的阻碍。并且小组成员没有办法同时进行开发，降低了开发效率。因此我们认为可以将整个项目进行功能划分，在不同模块中单独实现。多模块的解耦设计需要我们从面向实现设计代码转为面向接口设计，意味着只要我们事先设计好每个模块的接口，就可以实现所有开发与功能测试单独进行。通过解耦设计，使得各个功能模块的职责明确、逻辑清晰，极大简化了工程管理与代码设计。并且，Verilog的代码组织方式也是天然支持这种模块化设计方式，能够很清晰地划分不同模块的边界并且优雅地组合在一起。
+
                     </p>
+                    <p class="text">系统功能的拆分与单独模块的设计也有很多种方案。按GoF设计模式中的单一职责原则来说，每个模块所负责的功能必须单一，这样对于这个模块的修改将会减少对于其他模块的影响。我们将系统分为如下几个单一职责：</p>
 
                     <div class="wrap-list" id="list1">
                         <span>按键输入</span>
@@ -90,6 +93,10 @@
                         <img class="figure" src="assets/img/files.png" alt="文件组织">
                     </div>
 
+                    <p class="text">
+                        除此之外，为了规避多人合作开发中会遇到的各种麻烦与问题，我们统一指定了代码开发规范，包括注释规范，命名规范，接口规范。这些规范能够很好地帮助我们了解别人的代码。我们提高了代码可读性，不论是之后的调试，扩展，还是功能修改都感受到了很大帮助。并且在现在的作业展示环节，统一开发规范的好处依然能够体现出来，我们将在之后的篇章里清晰优雅地展现我们的工作成果😊。
+                    </p>
+
                 </div>
                 <h2>系统架构与接口</h2>
                 <div class="wrap-content">
@@ -100,8 +107,8 @@
                         <img class="figure" src="assets/img/sys_strcut.png" alt="系统结构图">
                     </div>
                     <p class="text">
-                        上图中标注了所有模块的输入输出接口以及之间的关联关系。最外层是一个<code>top.v</code>构建的顶层模块<code>top</code>，实例化了<code>led</code>,<code>tick</code>,<code>fsm</code>,<code>key</code>,<code>uart</code>几个模块，在<code>uart</code>中，则是接着使用了
-                        <code>uartTx</code>与 <code>uartRx</code>两个收发模块。他们之间通过顶层模块的一些内部信号（图中通过红色方框表示）相连。
+                        上图中标注了所有模块的输入输出接口以及之间的关联关系。最外层是一个<code class="intext">top.v</code>构建的顶层模块<code class="intext">top</code>，实例化了<code class="intext">led</code>,<code class="intext">tick</code>,<code class="intext">fsm</code>,<code class="intext">key</code>,<code class="intext">uart</code>几个模块，在<code class="intext">uart</code>中，则是接着使用了
+                        <code class="intext">uartTx</code>与 <code class="intext">uartRx</code>两个收发模块。他们之间通过顶层模块的一些内部信号（图中通过红色方框表示）相连。
 
                     </p>
                 </div>
@@ -122,6 +129,193 @@
                     模块功能设计
                 </h1>
 
+                <h2 class="subsection-title">LED模块</h2>
+                <div class="wrap-subsection">
+                <p>LED模块一共对外暴露了六个信号接口</p>
+                <ul>
+                    <li><code style="font-size: 15px; color: blue;" class="intext">clk</code> <br/>系统时钟，LED 模块的系统同步时钟信号，用于驱动模块内部所有时序逻辑的更新</li>
+                    <li><code style="font-size: 15px; color: blue;" class="intext">rst</code><br/> 模块复位信号，用于将 LED 模块内部状态初始化至预定义的初始状态。</li>
+                    <li><code style="font-size: 15px; color: blue;" class="intext">tick</code><br/> LED 显示状态切换的触发信号，用于指示 LED 模块在当前时钟周期执行一次显示更新操作。每当<code class="intext">tick</code> 有效时，模块根据当前工作模式对 LED 显示状态进行更新。</li>
+                    <li><code style="font-size: 15px; color: blue;" class="intext">mode</code><br/> 用于指示当前 LED 的流水模式，不同的模式对应不同的 LED 流水或显示策略。模块根据 <code class="intext">mode</code> 的取值选择相应的显示逻辑，并在 <code class="intext">tick</code>信号到达时更新 LED 状态。</li>
+                    <li><code style="font-size: 15px; color: blue;" class="intext">suspend</code><br/> LED 显示挂起控制信号。当该信号有效时，LED 模块保持当前显示状态不变，忽略 <code class="intext">tick</code> 信号，从而实现 LED 显示的暂停功能</li>
+                    <li><code style="font-size: 15px; color: blue;" class="intext">ledArr</code><br/> led array的意思，LED 控制输出信号，用于驱动外部 LED 硬件。该信号反映 LED 模块当前内部显示状态，其取值由 <code class="intext">tick</code>、<code class="intext">mode</code> 及 <code class="intext">suspend</code> 等控制信号共同决定。</li>
+                </ul>
+
+                <div class="wrap-code-segment ">
+                    <pre class="line-numbers"><code class="language-verilog rainbow-braces">
+`timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    led.v
+ * @brief   LED模块文件,负责LED模块的状态切换
+ *******************************************************************************
+ * @attention
+ *
+ * none
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clk:     系统时钟信号
+ * (+) rst:     复位信号，高电平有效
+ * (+) tick:    LED切换信号，上升沿有效
+ * (+) mode:    LED状态，取值[0, 1, 2]有效
+ * (+) suspend: LED切换挂起信号，高电平有效
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) ledArr:  LED控制信号输出
+ *
+ *******************************************************************************
+ * @author  MekLi
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+
+
+module led (
+
+    input wire clk,
+    input wire rst,
+
+    input wire       tick,
+    input wire [2:0] mode,
+    input wire       suspend,
+
+    output reg [3:0] ledArr
+);
+
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    reg lastTick;
+    reg direction;
+
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+
+    always @(posedge clk or posedge rst) begin
+
+        if (rst) begin
+
+            lastTick  <= 1'b0;
+            direction <= 1'b0;
+            ledArr    <= 4'b0000;
+
+        end else begin
+
+            if (ledArr == 4'b0000) begin
+                ledArr <= 4'b0001;
+            end
+
+            lastTick <= tick;
+
+
+            if (!suspend && (~lastTick & tick)) begin
+
+                case (mode)
+
+                    // 模式0 向左移动
+                    2'b00: begin
+                        direction <= 1;
+                        ledArr <= {
+                            ledArr[2:0],
+                            ledArr[3]
+                        };  // 循环左移
+                    end
+
+                    // 模式1 向右移动
+                    2'b01: begin
+
+                        // 最好同步调整跑马灯时候的方向设置
+                        direction <= 0;
+                        ledArr <= {
+                            ledArr[0],
+                            ledArr[3:1]
+                        };
+                    end
+
+                    // 模式2 跑马灯
+                    2'b10: begin
+
+                        ledArr <=
+                            direction
+                                ? ( {ledArr[0], ledArr[3: 1]})
+                                : ({ledArr[2: 0], ledArr[3]});
+
+
+                        direction <=
+                            (ledArr == 4'b0100)
+                                ? 1
+                                : ((ledArr == 4'b0010)
+                                    ? 0
+                                    : direction);
+
+                    end
+
+                    default: ;
+                endcase
+
+            end
+        end
+    end
+
+endmodule
+                    </code></pre>
+
+                </div>
+                <p class="text">
+                    LED模块的功能很清晰，就是在判断当前没有被停止的状态下，在mode信号的指导下，基于tick信号触发进行LED的状态切换。
+                    模块内有两个内部信号分别是lastTick与direction，具体功能在下文描述。
+                    时序逻辑也非常简单，最先判断rst复位信号是否有效，如果不是在复位状态判断led是否都是灭的。因为之后的所有逻辑都是通过对ledArr进行循环位移实现的而不是直接赋值，所以刚刚复位之后，在所有灯都是灭的时候，需要单独判断一下，并且手动直接赋值，点亮其中一颗LED。点亮之后就是通过lastTick内部信号与tick信号判断是否存在上升沿。如果有上升沿，说明该进行一次LED的状态切换。通过判断mode的值进入不同的控制分支。
+                </p>
+                <p class="text">
+                    0模式下控制LED的语句如下：
+                </p>
+                <pre class="line-numbers"><code class="language-verilog">ledArr <= {ledArr[2: 0], ledArr[3]}; // 循环左移</code></pre>
+
+                <p class="text">
+                    语句可以将原本ledArr的低三位移动到高三位，并且将最高位移动到最低位，完成一次循环左移。这样的操作要比通过加减计数值判断点亮第几颗灯逻辑上更加简单，更加安全，不容易出错。1模式下进行LED右移的操作是一样的。在2模式下则需要先对direction进行判断，direction就是用来记录当前LED移动方向的变量。对于direction的控制则需要特殊注意：
+                </p>
+                <pre class="line-numbers"><code class="language-verilog">
+                        direction <=
+                            (ledArr == 4'b0100)
+                                ? 1
+                                : ((ledArr == 4'b0010)
+                                    ? 0
+                                    : direction);
+                </code></pre>
+                <p class="text">
+                    如果当前的ledArr为0100也就是在下一次就要移动到边沿的时候就需要提前进行direction的改变。如果在1000时候再控制direction切换方向实际上已经迟了。因为时序逻辑的<=操作都是并行操作，当1000时修改完direction之后LED的切换依旧是基于旧的direction。因此需要在边沿的上一个LED进行direction从左向右的改变。当LED移动到右边沿时候同理。因此判断的时候通过两个三元操作符先后判断了当前是否是0100与0010状态而不是1000与0001。
+                    在mode为0或者1的时候的切换不需要依据direction。但是在这两个模式下的分支依然做了direction的赋值操作。为的是能够让LED在从0模式或者1模式切换到2模式的时候，能够保持上一个模式的状态。如果不这样做，direction里保持的是上一次2模式下的状态，如果上一次2模式在向右移动的时候被切换到了0模式，开始向左移动。再切换回到2模式的时候并不会继续向左，而是基于direction突然改变方向向右移动。因此为了让LED的移动更加顺滑，去除这些突兀的转移，在0模式与1模式中也对direction进行了处理。
+                </p>
+
+                </div>
+
+                <h2 class="subsection-title">Tick模块</h2>
+
             </div>
             <div class="section-tailer"></div>
         </div>
@@ -130,9 +324,13 @@
     </div>
 
     <div class="wrap-tailer">
-        <p><code>powered by MekLi</code></p>
-        <p><code>source on github: <a href="https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report">https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report</a></code></p>
+        <p><code class="segment">powered by MekLi</code></p>
+        <p><code class="segment">source on github: <a href="https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report">https://github.com/MekCraft-Lab/docs-lab</a></code></p>
     </div>
+
+    <script src="script/js/prism.js"></script>
+    <script src="https://unpkg.com/prismjs/plugins/rainbow-brackets/prism-rainbow-brackets.min.js"></script>
+
 </div>
 </body>
 </html>

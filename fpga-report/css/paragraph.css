@@ -39,8 +39,6 @@
         }
     }
 
-
-
     /* 标题样式 */
     .section-title {
         color: #b6d35a;
@@ -48,7 +46,6 @@
         font-weight: 100;
         margin: 0 0 30px 0;
     }
-
     .wrap-content {
 
         /* 正文 */
@@ -57,16 +54,6 @@
             margin-right: 50px;
             line-height: 1.8;
         }
-
-        code {
-            font-family: "Fira Code", monospace;
-            margin: 6px;
-
-            font-size: 15px;
-            border: 1px solid #bbb;
-            border-radius: 4px;
-        }
-
         .wrap-figure {
             .figure {
                 width: 100%;
@@ -75,6 +62,22 @@
     }
 }
 
+
+.intext {
+    font-family: "Fira Code", monospace;
+    margin: 6px;
+
+    font-size: 15px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+}
+
+.wrap-code-segment {
+    position: relative;
+    transform:translate(-50%, 0);
+    left: 50%;
+    width: 760px;
+}
 
 
 #section-1 {
