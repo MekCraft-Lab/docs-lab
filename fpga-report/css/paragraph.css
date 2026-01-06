@@ -48,23 +48,17 @@
     }
     .wrap-content {
 
-        /* 正文 */
-        .text {
-            margin-left: 50px;
-            margin-right: 50px;
-            line-height: 1.8;
-        }
-        .wrap-figure {
-            .figure {
-                width: 100%;
-            }
-        }
     }
 }
 
+.wrap-figure {
+    .figure {
+        width: 100%;
+    }
+}
 
 .intext {
-    font-family: "Fira Code", monospace;
+    font-family: "Maple Mono NF CN ExtraLight", monospace;
     margin: 6px;
 
     font-size: 15px;
@@ -79,6 +73,12 @@
     width: 760px;
 }
 
+/* 正文 */
+.text {
+    margin-left: 50px;
+    margin-right: 50px;
+    line-height: 1.8;
+}
 
 #section-1 {
 

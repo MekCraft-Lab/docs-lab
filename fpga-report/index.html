@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/main.css">
-    <link href="script/js/prism.js" rel="application/javascript" />
+    <link href="script/js/prism.js" rel="application/javascript"/>
     <link rel="stylesheet" href="css/prism.css"/>
     <title>FPGA原理与设计 设计报告</title>
 </head>
@@ -30,13 +30,13 @@
             <div class="name"><p>张晨</p>
                 <p>3023234088</p></div>
             <div class="name"><p>杨紫翔</p>
-                <p>30232340xx</p></div>
+                <p>3023234063</p></div>
             <div class="name"><p>施云峰</p>
                 <p>3023234002</p></div>
             <div class="name"><p>李牧泽
                 <p>3023234060</p></div>
             <div class="name"><p>李长龙</p>
-                <p>30232340xx</p></div>
+                <p>3023234062</p></div>
         </div>
     </div>
 
@@ -59,7 +59,8 @@
                         虽然将整体项目放在一个文件中整体实现在理论上来讲确实具有可行性，但是会让控制逻辑和代码高度耦合，显然会对代码的编写与功能调试产生很大的阻碍。并且小组成员没有办法同时进行开发，降低了开发效率。因此我们认为可以将整个项目进行功能划分，在不同模块中单独实现。多模块的解耦设计需要我们从面向实现设计代码转为面向接口设计，意味着只要我们事先设计好每个模块的接口，就可以实现所有开发与功能测试单独进行。通过解耦设计，使得各个功能模块的职责明确、逻辑清晰，极大简化了工程管理与代码设计。并且，Verilog的代码组织方式也是天然支持这种模块化设计方式，能够很清晰地划分不同模块的边界并且优雅地组合在一起。
 
                     </p>
-                    <p class="text">系统功能的拆分与单独模块的设计也有很多种方案。按GoF设计模式中的单一职责原则来说，每个模块所负责的功能必须单一，这样对于这个模块的修改将会减少对于其他模块的影响。我们将系统分为如下几个单一职责：</p>
+                    <p class="text">
+                        系统功能的拆分与单独模块的设计也有很多种方案。按GoF设计模式中的单一职责原则来说，每个模块所负责的功能必须单一，这样对于这个模块的修改将会减少对于其他模块的影响。我们将系统分为如下几个单一职责：</p>
 
                     <div class="wrap-list" id="list1">
                         <span>按键输入</span>
@@ -107,7 +108,11 @@
                         <img class="figure" src="assets/img/sys_strcut.png" alt="系统结构图">
                     </div>
                     <p class="text">
-                        上图中标注了所有模块的输入输出接口以及之间的关联关系。最外层是一个<code class="intext">top.v</code>构建的顶层模块<code class="intext">top</code>，实例化了<code class="intext">led</code>,<code class="intext">tick</code>,<code class="intext">fsm</code>,<code class="intext">key</code>,<code class="intext">uart</code>几个模块，在<code class="intext">uart</code>中，则是接着使用了
+                        上图中标注了所有模块的输入输出接口以及之间的关联关系。最外层是一个<code
+                            class="intext">top.v</code>构建的顶层模块<code class="intext">top</code>，实例化了<code
+                            class="intext">led</code>,<code class="intext">tick</code>,<code
+                            class="intext">fsm</code>,<code class="intext">key</code>,<code class="intext">uart</code>几个模块，在<code
+                            class="intext">uart</code>中，则是接着使用了
                         <code class="intext">uartTx</code>与 <code class="intext">uartRx</code>两个收发模块。他们之间通过顶层模块的一些内部信号（图中通过红色方框表示）相连。
 
                     </p>
@@ -129,19 +134,36 @@
                     模块功能设计
                 </h1>
 
-                <h2 class="subsection-title">LED模块</h2>
+                <h2 class="subsection-title">I. LED模块</h2>
                 <div class="wrap-subsection">
-                <p>LED模块一共对外暴露了六个信号接口</p>
-                <ul>
-                    <li><code style="font-size: 15px; color: blue;" class="intext">clk</code> <br/>系统时钟，LED 模块的系统同步时钟信号，用于驱动模块内部所有时序逻辑的更新</li>
-                    <li><code style="font-size: 15px; color: blue;" class="intext">rst</code><br/> 模块复位信号，用于将 LED 模块内部状态初始化至预定义的初始状态。</li>
-                    <li><code style="font-size: 15px; color: blue;" class="intext">tick</code><br/> LED 显示状态切换的触发信号，用于指示 LED 模块在当前时钟周期执行一次显示更新操作。每当<code class="intext">tick</code> 有效时，模块根据当前工作模式对 LED 显示状态进行更新。</li>
-                    <li><code style="font-size: 15px; color: blue;" class="intext">mode</code><br/> 用于指示当前 LED 的流水模式，不同的模式对应不同的 LED 流水或显示策略。模块根据 <code class="intext">mode</code> 的取值选择相应的显示逻辑，并在 <code class="intext">tick</code>信号到达时更新 LED 状态。</li>
-                    <li><code style="font-size: 15px; color: blue;" class="intext">suspend</code><br/> LED 显示挂起控制信号。当该信号有效时，LED 模块保持当前显示状态不变，忽略 <code class="intext">tick</code> 信号，从而实现 LED 显示的暂停功能</li>
-                    <li><code style="font-size: 15px; color: blue;" class="intext">ledArr</code><br/> led array的意思，LED 控制输出信号，用于驱动外部 LED 硬件。该信号反映 LED 模块当前内部显示状态，其取值由 <code class="intext">tick</code>、<code class="intext">mode</code> 及 <code class="intext">suspend</code> 等控制信号共同决定。</li>
-                </ul>
+                    <p>LED模块一共对外暴露了六个信号接口</p>
+                    <ul>
+                        <li><code style="font-size: 15px; color: blue;" class="intext">clk</code> <br/>系统时钟，LED
+                            模块的系统同步时钟信号，用于驱动模块内部所有时序逻辑的更新
+                        </li>
+                        <li><code style="font-size: 15px; color: blue;" class="intext">rst</code><br/> 模块复位信号，用于将
+                            LED 模块内部状态初始化至预定义的初始状态。
+                        </li>
+                        <li><code style="font-size: 15px; color: blue;" class="intext">tick</code><br/> LED
+                            显示状态切换的触发信号，用于指示 LED 模块在当前时钟周期执行一次显示更新操作。每当<code
+                                    class="intext">tick</code> 有效时，模块根据当前工作模式对 LED 显示状态进行更新。
+                        </li>
+                        <li><code style="font-size: 15px; color: blue;" class="intext">mode</code><br/> 用于指示当前 LED
+                            的流水模式，不同的模式对应不同的 LED 流水或显示策略。模块根据 <code class="intext">mode</code>
+                            的取值选择相应的显示逻辑，并在 <code class="intext">tick</code>信号到达时更新 LED 状态。
+                        </li>
+                        <li><code style="font-size: 15px; color: blue;" class="intext">suspend</code><br/> LED
+                            显示挂起控制信号。当该信号有效时，LED 模块保持当前显示状态不变，忽略 <code
+                                    class="intext">tick</code> 信号，从而实现 LED 显示的暂停功能
+                        </li>
+                        <li><code style="font-size: 15px; color: blue;" class="intext">ledArr</code><br/> led
+                            array的意思，LED 控制输出信号，用于驱动外部 LED 硬件。该信号反映 LED 模块当前内部显示状态，其取值由
+                            <code class="intext">tick</code>、<code class="intext">mode</code> 及 <code class="intext">suspend</code>
+                            等控制信号共同决定。
+                        </li>
+                    </ul>
 
-                <div class="wrap-code-segment ">
+                    <div class="wrap-code-segment ">
                     <pre class="line-numbers"><code class="language-verilog rainbow-braces">
 `timescale 1ns / 1ps
 /**
@@ -173,7 +195,7 @@
  * (+) ledArr:  LED控制信号输出
  *
  *******************************************************************************
- * @author  MekLi
+ * @author  张晨 & 施云峰
  * @date    2025/12/19
  * @version 1.0
  *******************************************************************************
@@ -285,21 +307,21 @@ module led (
 endmodule
                     </code></pre>
 
-                </div>
-                <p class="text">
-                    LED模块的功能很清晰，就是在判断当前没有被停止的状态下，在mode信号的指导下，基于tick信号触发进行LED的状态切换。
-                    模块内有两个内部信号分别是lastTick与direction，具体功能在下文描述。
-                    时序逻辑也非常简单，最先判断rst复位信号是否有效，如果不是在复位状态判断led是否都是灭的。因为之后的所有逻辑都是通过对ledArr进行循环位移实现的而不是直接赋值，所以刚刚复位之后，在所有灯都是灭的时候，需要单独判断一下，并且手动直接赋值，点亮其中一颗LED。点亮之后就是通过lastTick内部信号与tick信号判断是否存在上升沿。如果有上升沿，说明该进行一次LED的状态切换。通过判断mode的值进入不同的控制分支。
-                </p>
-                <p class="text">
-                    0模式下控制LED的语句如下：
-                </p>
-                <pre class="line-numbers"><code class="language-verilog">ledArr <= {ledArr[2: 0], ledArr[3]}; // 循环左移</code></pre>
+                    </div>
+                    <p class="text">
+                        LED模块的功能很清晰，就是在判断当前没有被停止的状态下，在mode信号的指导下，基于tick信号触发进行LED的状态切换。
+                        模块内有两个内部信号分别是lastTick与direction，具体功能在下文描述。
+                        时序逻辑也非常简单，最先判断rst复位信号是否有效，如果不是在复位状态判断led是否都是灭的。因为之后的所有逻辑都是通过对ledArr进行循环位移实现的而不是直接赋值，所以刚刚复位之后，在所有灯都是灭的时候，需要单独判断一下，并且手动直接赋值，点亮其中一颗LED。点亮之后就是通过lastTick内部信号与tick信号判断是否存在上升沿。如果有上升沿，说明该进行一次LED的状态切换。通过判断mode的值进入不同的控制分支。
+                    </p>
+                    <p class="text">
+                        0模式下控制LED的语句如下：
+                    </p>
+                    <pre class="line-numbers"><code class="language-verilog">ledArr <= {ledArr[2: 0], ledArr[3]}; // 循环左移</code></pre>
 
-                <p class="text">
-                    语句可以将原本ledArr的低三位移动到高三位，并且将最高位移动到最低位，完成一次循环左移。这样的操作要比通过加减计数值判断点亮第几颗灯逻辑上更加简单，更加安全，不容易出错。1模式下进行LED右移的操作是一样的。在2模式下则需要先对direction进行判断，direction就是用来记录当前LED移动方向的变量。对于direction的控制则需要特殊注意：
-                </p>
-                <pre class="line-numbers"><code class="language-verilog">
+                    <p class="text">
+                        语句可以将原本ledArr的低三位移动到高三位，并且将最高位移动到最低位，完成一次循环左移。这样的操作要比通过加减计数值判断点亮第几颗灯逻辑上更加简单，更加安全，不容易出错。1模式下进行LED右移的操作是一样的。在2模式下则需要先对direction进行判断，direction就是用来记录当前LED移动方向的变量。对于direction的控制则需要特殊注意：
+                    </p>
+                    <pre class="line-numbers"><code class="language-verilog">
                         direction <=
                             (ledArr == 4'b0100)
                                 ? 1
@@ -307,14 +329,870 @@ endmodule
                                     ? 0
                                     : direction);
                 </code></pre>
-                <p class="text">
-                    如果当前的ledArr为0100也就是在下一次就要移动到边沿的时候就需要提前进行direction的改变。如果在1000时候再控制direction切换方向实际上已经迟了。因为时序逻辑的<=操作都是并行操作，当1000时修改完direction之后LED的切换依旧是基于旧的direction。因此需要在边沿的上一个LED进行direction从左向右的改变。当LED移动到右边沿时候同理。因此判断的时候通过两个三元操作符先后判断了当前是否是0100与0010状态而不是1000与0001。
-                    在mode为0或者1的时候的切换不需要依据direction。但是在这两个模式下的分支依然做了direction的赋值操作。为的是能够让LED在从0模式或者1模式切换到2模式的时候，能够保持上一个模式的状态。如果不这样做，direction里保持的是上一次2模式下的状态，如果上一次2模式在向右移动的时候被切换到了0模式，开始向左移动。再切换回到2模式的时候并不会继续向左，而是基于direction突然改变方向向右移动。因此为了让LED的移动更加顺滑，去除这些突兀的转移，在0模式与1模式中也对direction进行了处理。
-                </p>
+                    <p class="text">
+                        如果当前的ledArr为0100也就是在下一次就要移动到边沿的时候就需要提前进行direction的改变。如果在1000时候再控制direction切换方向实际上已经迟了。因为时序逻辑的<=操作都是并行操作，当1000时修改完direction之后LED的切换依旧是基于旧的direction。因此需要在边沿的上一个LED进行direction从左向右的改变。当LED移动到右边沿时候同理。因此判断的时候通过两个三元操作符先后判断了当前是否是0100与0010状态而不是1000与0001。
+                        在mode为0或者1的时候的切换不需要依据direction。但是在这两个模式下的分支依然做了direction的赋值操作。为的是能够让LED在从0模式或者1模式切换到2模式的时候，能够保持上一个模式的状态。如果不这样做，direction里保持的是上一次2模式下的状态，如果上一次2模式在向右移动的时候被切换到了0模式，开始向左移动。再切换回到2模式的时候并不会继续向左，而是基于direction突然改变方向向右移动。因此为了让LED的移动更加顺滑，去除这些突兀的转移，在0模式与1模式中也对direction进行了处理。
+                    </p>
 
                 </div>
 
-                <h2 class="subsection-title">Tick模块</h2>
+                <h2 class="subsection-title">II. Tick模块</h2>
+                <div class="wrap-subsection">
+                    <p class="text">
+                        tick 模块用于在任意时钟 clkIn 的基础上，根据外部配置的分频系数 periodMs 产生一个分频脉冲信号
+                        clkOut。
+                        该节拍信号用于驱动 LED
+                        状态更新等周期性事件，从而实现可配置周期的事件触发机制。在LED的流水切换与UART的采样上都需要用到时钟分频，本身打算都使用tick模块提供。后来UART舍弃了外部的时钟触发方式，内部自行实现采样时钟。
+
+                    </p>
+                    <ul>
+                        <li><code style="color: blue;" class="intext">clkIn</code> <br/>模块的时钟输入，分频之前的信号
+                        </li>
+                        <li><code style="color: blue;" class="intext">rst</code> <br/>复位信号，清空计数寄存器</li>
+                        <li><code style="color: blue;" class="intext">periodMs</code> <br/> 32位，分频系数</li>
+                        <li><code style="color: blue;" class="intext">clkOut</code> <br/>模块的时钟输出，输出信号为以periodMs为周期的脉冲
+                        </li>
+                    </ul>
+                    <div class="wrap-code-segment">
+                        <pre class="line-numbers"><code class="lang-verilog">
+                            `timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    tick.v
+ * @brief   Tick模块，用于时钟分频
+ *******************************************************************************
+ * @attention
+ *
+ * none
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clkIn:   分频前时钟
+ * (+) rst:     复位信号，高电平有效
+ * (+) preiodMs:分频系数
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) clkOut:  分频之后的脉冲
+ *
+ *******************************************************************************
+ * @author  张晨 & 施云峰
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+
+
+module tick(
+    input  wire        clkIn,
+    input  wire        rst,
+    input  wire [31:0] periodMs,
+    output reg         clkOut
+);
+
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    reg [31:0] cnt;
+
+
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+    always @(posedge clkIn or posedge rst) begin
+
+        // 复位键按下
+        if (rst) begin
+
+            cnt    <= 0;
+            clkOut <= 1'b0;
+
+        end else if (cnt >= periodMs) begin
+
+            cnt    <= 0;
+            clkOut <= 1'b1;
+
+        end else begin
+
+            cnt    <= cnt + 1;
+            clkOut <= 1'b0;
+
+        end
+
+    end
+
+
+
+
+
+endmodule
+
+                        </code></pre>
+                    </div>
+                    <p class="text">
+                        tick模块首先判断复位信号是否有效，如果不是复位状态，则进行计数，当计数值达到periodMs之后，将脉冲输出拉高一个时钟，然后清空计数，拉低输出，开始下一个循环
+                    </p>
+                </div>
+
+                <h2 class="subsection-title">III. Key模块</h2>
+                <div class="wrap-subsection">
+                    <p class="text">
+                        key 模块用于对来自物理按键的输入信号进行同步、防抖处理，并最终输出稳定可靠的按键事件脉冲信号。
+                        由于机械按键在按下与释放过程中会产生明显的抖动现象，若直接将按键输入用于状态机或控制逻辑，易引发误触。因此，本模块通过多级同步、计数延时确认以及边沿检测的方式，对按键信号进行完整的时序处理。
+                        在本工程中，key 模块将物理按键行为抽象为单周期有效的事件信号，供系统状态机（FSM）使用，从而避免上层逻辑直接处理异步、抖动的硬件信号，降低系统复杂度。
+                    </p>
+
+                    <ul>
+                        <li><code style="color: blue" class="intext">clk</code> <br/>模块的系统时钟输入信号，用于驱动按键同步寄存器、防抖计数器以及边沿检测逻辑，保证所有处理均在统一时钟域内完成。
+                        </li>
+                        <li><code style="color: blue" class="intext">rst</code> <br/>高有效复位信号，用于清空内部同步寄存器、计数器及历史状态寄存器，确保系统复位后按键状态处于确定初始值。
+                        </li>
+                        <li><code style="color: blue" class="intext">btn1</code> <br/>物理按键 1
+                            的原始输入信号，属于异步信号，可能包含抖动与毛刺，需要经过同步与防抖处理。
+                        </li>
+                        <li><code style="color: blue" class="intext">btn2</code> <br/>物理按键 2 的原始输入信号，处理流程与
+                            btn1 完全一致，实现方式上保持对称，便于后续功能扩展。
+                        </li>
+                        <li><code style="color: blue" class="intext">key1</code> <br/>按键 1 的防抖后事件输出信号。当检测到
+                            btn1 状态由低变高并稳定保持超过设定防抖时间后，输出一个单时钟周期宽度的上升沿脉冲，用于触发上层控制逻辑。
+                        </li>
+                        <li><code style="color: blue" class="intext">key2</code> <br/>按键 2 的防抖后事件输出信号，输出形式与
+                            key1 相同，同样为单周期有效的上升沿脉冲信号。
+                        </li>
+                    </ul>
+                    <div class="wrap-code-segment">
+                    <pre class="line-numbers"><code class="lang-verilog">
+`timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    key.v
+ * @brief   按键模块，用于处理按键电平并产生事件
+ *******************************************************************************
+ * @attention
+ *
+ * none
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clk:     系统时钟信号
+ * (+) rst:     复位信号，高电平有效
+ * (+) btn1:    物理按键引脚1
+ * (+) btn2:    物理按键引脚2
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) key1:    物理按键1触发事件，上升沿有效
+ * (+) key2:    物理按键2触发事件，上升沿有效
+ *
+ *******************************************************************************
+ * @author  杨紫翔
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+module key (
+    input wire clk,
+    input wire rst,   // 高有效复位
+    input wire btn1,
+    input wire btn2,
+
+    output reg key1,  // 防抖后的上升沿脉冲
+    output reg key2
+);
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    parameter integer DEBOUNCE_CNT = 500_000;  // 10ms @125MHz
+
+
+    reg btn1_ff1, btn1_ff2;
+    reg btn2_ff1, btn2_ff2;
+
+    reg [$clog2(DEBOUNCE_CNT):0] cnt1;
+    reg [$clog2(DEBOUNCE_CNT):0] cnt2;
+
+
+    reg btn1_stable;
+    reg btn2_stable;
+
+    reg btn1_last;
+    reg btn2_last;
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            btn1_ff1 <= 1'b0;
+            btn1_ff2 <= 1'b0;
+            btn2_ff1 <= 1'b0;
+            btn2_ff2 <= 1'b0;
+        end else begin
+            btn1_ff1 <= btn1;
+            btn1_ff2 <= btn1_ff1;
+            btn2_ff1 <= btn2;
+            btn2_ff2 <= btn2_ff1;
+        end
+    end
+
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            cnt1        <= 0;
+            cnt2        <= 0;
+            btn1_stable <= 1'b0;
+            btn2_stable <= 1'b0;
+        end else begin
+            // ---- btn1 ----
+            if (btn1_ff2 == btn1_stable) cnt1 <= 0;
+            else if (cnt1 < DEBOUNCE_CNT) cnt1 <= cnt1 + 1'b1;
+            else begin
+                cnt1        <= 0;
+                btn1_stable <= btn1_ff2;
+            end
+
+            // ---- btn2 ----
+            if (btn2_ff2 == btn2_stable) cnt2 <= 0;
+            else if (cnt2 < DEBOUNCE_CNT) cnt2 <= cnt2 + 1'b1;
+            else begin
+                cnt2        <= 0;
+                btn2_stable <= btn2_ff2;
+            end
+        end
+    end
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            btn1_last <= 1'b0;
+            btn2_last <= 1'b0;
+            key1      <= 1'b0;
+            key2      <= 1'b0;
+        end else begin
+            key1 <= (~btn1_last) & btn1_stable;  // 上升沿
+            key2 <= (~btn2_last) & btn2_stable;
+
+            btn1_last <= btn1_stable;
+            btn2_last <= btn2_stable;
+        end
+    end
+
+endmodule
+
+                    </code></pre>
+                    </div>
+
+                    <p class="text">
+                        模块定义了一个局部参数 <code class="intext">DEBOUNCE_CNT</code>用于记录按键的有效时间。这个局部参数不能被上层修改。
+                    </p>
+                    <p class="text">
+                        通过系统函数 <code class="intext">$clog2(DEBOUNCE_CNT)</code>自动计算出用于延时的计数器需要的位数。
+                    </p>
+                    <p class="text">
+                        Key模块主要由三个时序逻辑组成
+                    </p>
+                    <p class="text">
+                        第一个时序逻辑负责判断复位信号以及两级按键电平的状态保存。
+                        第二个时序中，如果 <code class="intext">ff2</code> <code class="intext">stable</code>，意味着已经重新开始一次新的触发，开始
+                        <code class="intext">cnt</code>数器的计数，直至达到预设延时时间，在这期间如果 <code
+                            class="intext">ff2</code>为抖动重新回到了上一个电平状态，意味着 <code
+                            class="intext">ff2</code> <code class="intext">stable</code>等，将会将计数器 <code
+                            class="intext">cnt</code>空，重新准备计时。如果稳定地等到了计数完成，则认为是一次有效的电平转换，重新改变
+                        <code class="intext">stable</code>的值并清空</code class="intext">cnt</code>准备下一次的计数。
+                        第三个时序负责初始事件输出与物理按键电平之间的关系。通过不断检测 <code
+                            class="intext">stable</code> <code class="intext">last</code>值判断是否产生上升沿。如果存在上升沿则拉高
+                        <code class="intext">key</code>，输出按键事件脉冲，随后拉低 <code class="intext">key</code>
+                    </p>
+                </div>
+
+                <h2 class="subsection-title">IV. FSM模块</h2>
+                <div class="wrap-subsection">
+                    <p class="text">
+                        FSM模块是整个系统的核心控制单元，负责统一管理按键事件、串口命令解析、系统运行状态以及状态信息的串口反馈。
+                        该模块通过状态机的方式，对来自不同输入源（按键与 UART）的控制指令进行仲裁与处理，并将最终的控制结果以清晰、稳定的接口形式输出给
+                        LED 控制模块和Tick模块。
+                        从系统结构上看，FSM 模块位于功能调度层，不直接驱动外设，而是通过输出 mode、suspend 和 periodMs
+                        等状态信号，对下层功能模块进行统一配置，从而实现逻辑解耦和职责划分。
+                        FSM 模块主要完成以下功能：
+                    </p>
+
+                    <ol>
+                        <li>按键事件处理 <br/>响应模式切换按键，实现流水灯模式循环切换,响应暂停按键，实现流水灯运行状态的暂停与恢复
+                        </li>
+                        <li>串口命令解析 <br/>,支持通过 ASCII 指令切换流水灯模式
+                            ,支持串口控制暂停 / 运行状态
+                            ,支持通过 'S' + 数字 指令动态调整流水灯速度
+                            ,支持通过特定字符串指令查询系统当前状态
+                        </li>
+                        <li>系统状态维护 <br/> 维护当前流水灯模式 mode
+                            ,维护运行 / 暂停状态 suspend
+                            ,维护流水灯更新周期 periodMs
+                        </li>
+                        <li>串口状态反馈 <br/>在接收到合法查询指令后，通过 UART 发送
+                            MODE=n,RUN 或 MODE=n,PAUSE 形式的状态字符串
+                        </li>
+                    </ol>
+
+                    <p class="text">
+                        接口定义如下:
+                    </p>
+
+                    <ul>
+                        <li>时钟与复位接口
+                            <ul>
+                                <li><code class="intext" style="color: blue;">clk</code> <br/>系统主时钟输入，用于驱动 FSM 的状态转移、计数逻辑以及串口控制时序。
+                                </li>
+                                <li><code class="intext" style="color: blue;">rst</code> <br/> 高有效复位信号，用于初始化 FSM
+                                    状态、模式参数及所有内部寄存器，确保系统上电或复位后处于确定状态。
+                                </li>
+                            </ul>
+                        </li>
+                        <li>按键事件接口
+                            <ul>
+                                <li><code class="intext" style="color: blue;">changeEvent</code> <br/>模式切换事件输入信号，为单周期有效脉冲。
+                                    每次有效触发时，FSM 在模式 0、1、2 之间循环切换。
+                                </li>
+                                <li><code class="intext" style="color: blue;">suspendEvent</code> <br/>暂停 / 继续事件输入信号，为单周期有效脉冲。
+                                    每次触发时，FSM 翻转当前运行状态，实现暂停与恢复功能。
+                                </li>
+                            </ul>
+                        </li>
+                        <li>UART接收接口
+                            <ul>
+                                <li><code class="intext" style="color: blue;">rValid</code> <br/>UART 接收数据有效信号，表示当前 <code class="intext">dataIn</code> 中的数据为新接收到的有效字节。 </li>
+                                <li><code class="intext" style="color: blue;">rReady</code> <br/> UART 接收准备完成信号，由 FSM 输出，用于指示当前模块可以继续接收串口数据。</li>
+                                <li><code class="intext" style="color: blue;">dataIn</code> <br/>UART 接收的 8 位 ASCII 数据的缓冲区，用于解析模式切换、暂停控制、调速与查询命令。</li>
+                                <li><code class="intext" style="color: blue;">idle</code> <br/>UART 空闲指示信号，用于判断一帧指令是否接收完成，是串口协议状态机的重要判定条件。</li>
+                            </ul>
+                        </li>
+                        <li>UART发送接口
+                            <ul>
+                                <li><code class="intext" style="color: blue;">tValid</code> <br/> UART 发送使能信号，由 FSM 控制，在需要发送状态反馈时拉高。</li>
+                                <li><code class="intext" style="color: blue;">tReady</code> <br/> UART 发送准备完成信号，用于与发送模块进行握手，确保数据在正确时序下发送。</li>
+                                <li><code class="intext" style="color: blue;">dataOut</code> <br/> UART 发送数据输出缓冲区，用于逐字节输出状态字符串。</li>
+                            </ul>
+                        </li>
+                        <li>系统状态输出接口
+                            <ul>
+                                <li><code class="intext" style="color: blue;">mode</code> <br/> LED流水模式</li>
+                                <li><code class="intext" style="color: blue;">suspend</code> <br/> 暂停信号</li>
+                                <li><code class="intext" style="color: blue;">periodMs</code> <br/> LED的切换时钟信号分频系数</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <div class="wrap-code-segment">
+                        <pre class="line-numbers"><code class="lang-verilog">
+`timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    fsm.v
+ * @brief   状态机模块，用于全局状态控制与串口数据处理
+ *******************************************************************************
+ * @attention
+ *
+ * none
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clk:         系统时钟信号
+ * (+) rst:         复位信号，高电平有效
+ * (+) changeEvent: 状态改变事件，上升沿有效
+ * (+) suspendEvent:挂起事件，上升沿有效
+ * (+) rValid:      串口数据接收事件
+ * (+) tReady:      串口发送准备完成
+ * (+) dataIn:      接收缓冲区
+ * (+) idle:        串口空闲状态
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) rReady:      缓冲区已空
+ * (+) tValid:      串口发送使能
+ * (+) dataOut:     输出缓冲区
+ * (+) mode:        运行状态
+ * (+) suspend:     挂起状态
+ * (+) periodMs:    延时分频系数
+ *
+ *******************************************************************************
+ * @author  MekLi
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+
+`define GET_MAX_COUNT(clkFreq, periodMs) ((clkFreq / 1000) * periodMs)
+module fsm #(
+    CLK_FREQ  = 50_000_000,
+    PERIOD_MS = 500
+) (
+    input  wire        clk,
+    input  wire        rst,
+    /* event */
+    input  wire        changeEvent,
+    input  wire        suspendEvent,
+    /* uart */
+    input  wire        rValid,        /* 读取有效 */
+    output wire        rReady,        /* 接收准备完成 */
+    output wire        tValid,        /* 使能写入 */
+    input  wire        tReady,        /* 写入准备完成 */
+    input  wire [ 7:0] dataIn,        /* 接收的字节 */
+    output wire [ 7:0] dataOut,       /* 输出的字节 */
+    input  wire        idle,
+    /* status */
+    output reg  [ 2:0] mode,
+    output reg         suspend,
+    output wire [31:0] periodMs
+);
+
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    reg chgEntPrevReg   = 0;  // 上一刻切换事件
+    reg spndEntPrevReg  = 0;  //上一刻暂停事件
+    reg rReadyReg       = 1;  // 是否启用串口接收
+    reg [7:0] state     = 0;  //状态
+    reg [31:0] periodReg =
+    `GET_MAX_COUNT(CLK_FREQ, PERIOD_MS);  // LED计时间隔
+    reg [31:0] calcReg  = 0;  // 计算中间寄存器
+    reg [7:0] dataReg   = 0;
+    reg tValidReg       = 0;
+
+    /************************** 接收状态 ******************************/
+    /* 状态常量 */
+    localparam PROTOCOL_STATE_IDLE      = 0;
+    localparam PROTOCOL_STATE_S_MODE    = 1;
+    localparam PROTOCOL_STATE_SPEED     = 2;
+    localparam PROTOCOL_STATE_REQUEST   = 3;
+    localparam PROTOCOL_STATE_RESPONSE  = 4;
+    localparam PROTOCOL_STATE_ERROR     = 5;
+
+    /*
+        匹配命令：
+        State of you - 所有状态
+    */
+    localparam PAT_LEN = 11;  // 字符串模式长度
+    reg [7:0] pattern[0:PAT_LEN - 1];  // 模式ROM
+
+    initial begin
+        pattern[0]  = "t";
+        pattern[1]  = "a";
+        pattern[2]  = "t";
+        pattern[3]  = "e";
+        pattern[4]  = " ";
+        pattern[5]  = "o";
+        pattern[6]  = "f";
+        pattern[7]  = " ";
+        pattern[8]  = "y";
+        pattern[9]  = "o";
+        pattern[10] = "u";
+    end
+
+    reg [7:0] matchIndex = 0;  // 匹配索引
+    reg match;
+
+    /************************** 发送状态 ******************************/
+    /*
+        回复命令：
+        MODE=n,RUN/PAUSE
+    */
+    reg [7:0] txState = 0;
+    reg [7:0] txIndex = 0;
+    localparam TRANSMIT_STATE_IDLE = 0;  // 发送空闲状态
+    localparam TRANSMIT_STATE_MODE = 1;  // 发送模式状态
+    localparam TRANSMIT_STATE_PAUSE = 2;  // 发送暂停状态
+    localparam TRANSMIT_STATE_RUN = 3;  //发送运行状态
+
+    localparam MODE_VALUE_LEN = 7;
+
+    /* 模式字符串 */
+    reg [7:0] modeString[0:MODE_VALUE_LEN - 1];
+
+    initial begin
+        modeString[0] = "M";
+        modeString[1] = "O";
+        modeString[2] = "D";
+        modeString[3] = "E";
+        modeString[4] = "=";
+        modeString[5] = "n";
+        modeString[6] = ",";
+    end
+
+    /* 运行字符串 */
+    localparam RUN_STATE_STRING_LEN = 3;
+    reg [7:0] runStateString[0:RUN_STATE_STRING_LEN - 1];  //运行状态下发送的字符串
+
+    initial begin
+        runStateString[0] = "R";
+        runStateString[1] = "U";
+        runStateString[2] = "N";
+    end
+
+    /* 暂停状态字符串 */
+    localparam PAUSE_STATE_STRING_LEN = 5;
+    reg [7:0] pauseStateString[0:PAUSE_STATE_STRING_LEN - 1];
+
+    initial begin
+        pauseStateString[0] = "P";
+        pauseStateString[1] = "A";
+        pauseStateString[2] = "U";
+        pauseStateString[3] = "S";
+        pauseStateString[4] = "E";
+    end
+
+
+
+
+
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 2. Combinational Logic ------------------------------------*/
+
+    assign rReady   = rReadyReg;
+    assign periodMs = periodReg;
+    assign dataOut  = dataReg;
+    assign tValid   = tValidReg;
+
+
+
+
+    /* ----------- 2. Sequential Logic ---------------------------------------*/
+
+
+    /************************ 输入与按键状态机 ************************/
+
+    always @(posedge clk or posedge rst) begin
+
+        if (rst) begin
+
+            mode           <= 0;
+            state          <= 0;
+            chgEntPrevReg  <= 0;
+            spndEntPrevReg <= 0;
+            suspend        <= 0;
+            periodReg      <= `GET_MAX_COUNT(CLK_FREQ, PERIOD_MS);
+            calcReg        <= 0;
+            matchIndex     <= 0;
+            match          <= 0;
+
+        end else begin
+            if (!suspend) begin
+
+
+                /* 按键处理逻辑 */
+                if (~chgEntPrevReg & changeEvent) begin
+                    if (mode < 2) begin
+                        mode <= mode + 1;
+                    end else begin
+                        // mode不等于3，并且mode大于等于2.
+                        mode <= 0;
+                    end
+                end
+
+                /* 串口数据处理逻辑 */
+                if (rValid && rReady) begin
+                    /* ASCII 码处理*/
+                    if (dataIn >= "0" && dataIn <= "2") begin
+                        mode <= dataIn - "0";
+                    end
+                end
+
+            end
+
+            /* 暂停按键处理 */
+            if (~spndEntPrevReg & suspendEvent) begin
+
+                // 按键二的信号有上升沿
+                suspend <= ~suspend;
+
+            end
+
+            /* 串口字节接收回调 */
+            if (rValid && rReady) begin
+
+                case (state)
+                    /* 空闲状态 */
+                    PROTOCOL_STATE_IDLE: begin
+                        if (dataIn >= "0" && dataIn <= "2") begin
+                            mode <= dataIn - "0";
+                        end else if (dataIn == "P" || dataIn == "p") begin
+                            suspend <= 1;
+                        end else if (dataIn == "R" || dataIn == "r") begin
+                            suspend <= 0;
+                        end else if (dataIn == "S") begin
+                            state <= PROTOCOL_STATE_S_MODE;
+                        end
+                    end
+
+                    /* S 模式 */
+                    PROTOCOL_STATE_S_MODE: begin
+                        /* 进入调速模式 */
+                        if (dataIn >= "0" && dataIn <= "9") begin
+
+                            state   <= PROTOCOL_STATE_SPEED;
+                            calcReg <= calcReg * 10 + (dataIn - "0");
+                        end
+
+                        /* 进入请求模式 */
+                        if (dataIn == pattern[0]) begin
+                            state      <= PROTOCOL_STATE_REQUEST;
+                            match      <= 0;
+                            matchIndex <= 1;
+                        end
+
+
+                    end
+
+                    /* 调速状态 */
+                    PROTOCOL_STATE_SPEED: begin
+                        if (dataIn >= "0" && dataIn <= "9") begin
+                            calcReg <= calcReg * 10 + (dataIn - "0");
+                        end else begin
+                            /* 复位 */
+                            calcReg <= 0;
+                            /* 调整为错误状态 */
+                            state   <= PROTOCOL_STATE_ERROR;
+                        end
+
+                    end
+
+                    /* 询问状态 */
+                    PROTOCOL_STATE_REQUEST: begin
+                        /* 还没有匹配完成，此时match没有置一*/
+                        if (!match && dataIn == pattern[matchIndex]) begin
+                            /* 匹配结束 */
+                            if (matchIndex == PAT_LEN - 1) begin
+                                match      <= 1;
+                                matchIndex <= 0;
+                            end else begin
+                                /* 匹配过程，逐个递增 */
+                                matchIndex <= matchIndex + 1;
+                            end
+
+                        end else begin
+                            /* 这里有几种情况:
+                                match已经置一，说明匹配成功，但是有多余字符，依然判定为错误
+                                match还没有置一，说明匹配过程中已经是出现错误
+                            */
+
+                            /* 如果匹配错误了， 索引值归零 */
+                            match      <= 0;
+                            matchIndex <= 0;
+                            /* 设置为错误状态 */
+                            state      <= PROTOCOL_STATE_ERROR;
+                        end
+                    end
+
+
+                    default: ;
+                endcase
+            end
+
+            /* 调速状态， 并且帧全部接收完成，处于串口空闲状态 */
+            if (state == PROTOCOL_STATE_SPEED && idle) begin
+                /* 回到协议的空闲状态 */
+                state     <= PROTOCOL_STATE_IDLE;
+                periodReg <= `GET_MAX_COUNT(CLK_FREQ, calcReg);
+                calcReg   <= 0;
+            end
+
+            /* 询问状态， 并且帧全部接收完成，处于串口空闲状态*/
+            if (state == PROTOCOL_STATE_REQUEST && idle && match) begin
+                /* 无多余字符，说明指令正确，转到回复状态 */
+                state      <= PROTOCOL_STATE_RESPONSE;
+                /* 复位 */
+                match      <= 0;
+                matchIndex <= 0;
+            end
+
+            /* 回复状态，触发一次之后回到空闲状态 */
+            if (state == PROTOCOL_STATE_RESPONSE) begin
+                state <= PROTOCOL_STATE_IDLE;
+            end
+
+            /* 当接收完整帧之后，再恢复到空闲状态 */
+            if (state == PROTOCOL_STATE_ERROR && idle) begin
+                state <= PROTOCOL_STATE_IDLE;
+            end
+
+
+        end
+        chgEntPrevReg  <= changeEvent;
+        spndEntPrevReg <= suspendEvent;
+
+    end
+
+
+    /***************************** 发送状态机 *****************************/
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            txState   <= TRANSMIT_STATE_IDLE;
+            txIndex   <= 0;
+            dataReg   <= 0;
+            tValidReg <= 0;
+        end else begin
+            // 有新的发送请求并且当前发送状态为空闲状态
+            if (state == PROTOCOL_STATE_RESPONSE
+                && txState == TRANSMIT_STATE_IDLE) begin
+
+                /* 配制好状态，发送数据，以及发送索引 */
+                txState       <= TRANSMIT_STATE_MODE;
+                txIndex       <= 0;
+                modeString[5] <= (mode + "0");
+            end else begin
+                case (txState)
+
+                    /* 发送模式状态 */
+                    TRANSMIT_STATE_MODE: begin
+                        if (txIndex == MODE_VALUE_LEN) begin
+                            /* 此时MODE发送完成 */
+                            txIndex <= 0;
+                            /* 模式转移 */
+                            if (suspend) begin
+                                txState <= TRANSMIT_STATE_PAUSE;
+                            end else begin
+                                txState <= TRANSMIT_STATE_RUN;
+                            end
+
+                        end else if (!tValid && tReady) begin
+
+                            /* 发送回调 */
+                            dataReg   <= modeString[txIndex];
+                            txIndex   <= txIndex + 1;
+                            tValidReg <= 1;
+                        end
+                    end
+
+                    /* 发送暂停状态 */
+                    TRANSMIT_STATE_PAUSE: begin
+                        if (txIndex == PAUSE_STATE_STRING_LEN) begin
+                            /* PAUSE 发送完成 */
+                            txIndex <= 0;
+                            /* 模式转移到空闲 */
+                            txState <= TRANSMIT_STATE_IDLE;
+                        end else if (!tValid && tReady) begin
+                            /* 配置发送 */
+                            dataReg   <= pauseStateString[txIndex];
+                            txIndex   <= txIndex + 1;
+                            tValidReg <= 1;
+                        end
+                    end
+
+                    /* 发送运行状态 */
+                    TRANSMIT_STATE_RUN: begin
+                        if (txIndex == RUN_STATE_STRING_LEN) begin
+                            /* PAUSE 发送完成 */
+                            txIndex <= 0;
+                            /* 模式转移到空闲 */
+                            txState <= TRANSMIT_STATE_IDLE;
+                        end else if (!tValid && tReady) begin
+                            /* 配置发送 */
+                            dataReg   <= runStateString[txIndex];
+                            txIndex   <= txIndex + 1;
+                            tValidReg <= 1;
+                        end
+                    end
+
+                    default: ;
+
+                endcase
+
+
+            end
+
+            /* 处理发送信号 */
+            if (tValid && tReady) begin
+                tValidReg <= 0;
+            end
+        end
+    end
+
+endmodule
+
+                        </code></pre>
+                    </div>
+
+                    <p class="text">
+                        一部分信号虽然是 <code class="intext">output</code>但是并没有设定成 <code class="intext">reg</code>，而是定义为 <code class="intext">wire</code>类型，通过内部的 <code class="intext">reg</code>类型的信号控制 <code class="intext">output wire</code>。这样做可以通过组合逻辑方便后面的修改与扩展而不需要改动接口。
+
+                    </p>
+                    <p class="text">
+                        FSM模块主要是用来做上层的状态转移的逻辑判断。FSM模块不仅需要解析上层的查询指令"State of you"，与调速指令"Sxxx"等等，并且需要准备向上位机发送的串口字符。FSM模块通过定义 <code class="intext">PROTOCOL_STATE_IDLE     </code> , <code class="intext">PROTOCOL_STATE_S_MODE   </code> , <code class="intext">PROTOCOL_STATE_SPEED    </code> , <code class="intext">PROTOCOL_STATE_REQUEST  </code> , <code class="intext">PROTOCOL_STATE_RESPONSE </code> , <code class="intext">PROTOCOL_STATE_ERROR    </code> 几个参数用于状态的索引。将"State of you"几个字符作为常量存储在 <code class="intext">pattern</code>数组中。协议发送方面定义了 <code class="intext">TRANSMIT_STATE_IDLE </code>,  <code class="intext">TRANSMIT_STATE_MODE </code>,  <code class="intext">TRANSMIT_STATE_PAUSE </code>,  <code class="intext">TRANSMIT_STATE_RUN</code> 几个参数用于发送参数的状态索引，并且将发送需要的字符串存入到数组 <code class="intext">modeString</code>,  <code class="intext">runStateString</code>,  <code class="intext">pauseStateString</code>中。
+                        FSM模块的时序逻辑分为了两个部分，分别控制LED状态与接收状态转移和发送状态转移.
+                    </p>
+                    <p class="text">
+                        控制LED状态与接收状态转移的部分工作流程如下：
+                        在判断复位信号无效之后判断是否是暂停状态，如果正在运行而不是暂停，则循环检测模式更改事件的上升沿与串口接收信号。前者用于循环递增模式变量，后者用于解析缓冲区数据并根据数据更改模式变量。在这之后还会轮询暂停事件，如果被触发，翻转暂停状态信号 <code class="intext">suspend</code>，完成暂停状态与运行状态之间的切换。
+                        后面的逻辑则是串口消息的解析。从普通的IDLE空闲状态开始，如果接收到了数字或者"P", "R"等直接进行单字节流处理，不需要进行状态的转移。但是如果接收到了"S"，说明之后的指令是多字节指令，需要进行状态转移。由于调速指令"Sxxxx"与询问指令"State of you"都是S为前缀，因此需要额外设置一个S_MODE用于中间状态，接收到"S"字符之后就会转移到这个状态。在S状态下会继续检测之后的字符。如果之后的字符不是数字也不是"State of you"这个指令，接收状态会从S_MODE跳转到ERROR。如果第二个字符是数字，则跳转到SPEED状态用于调速指令的解析。如果是"t"则会跳转到REQUEST模式下进行协议解析和判断。这两个状态在一帧数据包发送完之前会持续检测。SPEED状态会一直检测是否是数字，REQUEST模式会一直检测是否符合"State of you"这个指令，直到UART接收模块将串口空闲信号拉高，说明当前数据包接收完成，并且这个数据包从开始到结束没有出现错误字符或者多余字符的情况下判定协议解析成功。如果在接收到串口空闲信号之前，SPEED状态下接收到了非数字或者REQUEST状态下接收到了"State of you"以外的字符或者顺序没有严格符合。两个状态都会跳转到ERROR状态，ERROR状态则会在串口空闲信号拉高之后回到 IDLE状态。
+                        如果向芯片发送的正确调速数据包，状态机进入SPEED模式会逐字节处理这些数字字符，将其从ASCII码转为数字，并且将其缓存进 <code class="intext">calcReg</code>寄存器中。等接收到下一个数字之后，将 <code class="intext">calcReg</code>寄存器缓存的值乘十，再加上新的数字，这样完成10进制调速协议的数字解析。SPEED状态下等到串口空闲信号之后通过 <code class="intext">GET_MAX_COUNT</code>宏计算出在当前系统时钟频率与接收到的LED闪烁周期（ms）的条件下的Tick模块的分频系数。并将其存入 <code class="intext">periodMsReg</code>寄存器中，输出到Tick模块。
+                        如果向芯片发送"State of you"，状态机进入到REQUEST模式，芯片会不断检索字符是否符合预设命令，每次比较完成之后将索引值自增。其中遇到错误就会将索引值直接清空复位。如果一直到串口空闲都没有出现问题，则会将状态转移到PROTOCOL_STATE_RESPONSE一个时钟周期之后回到接收空闲状态。
+                        发送逻辑则会检测接收状态是否触发 <code class="intext">PROTOCOL_STATE_RESPONSE</code>状态，如果触发了一次这个状态并且当前的发送逻辑处于空闲状态，将会将发送状态从空闲转移到 <code class="intext">TRANSMIT_STATE_MODE</code>。过程就是根据索引一个字节一个字节发送一串字符，并且将 <code class="intext">mode</code>。mode发送完成之后发送状态从MODE转移到RUN或者PAUSE，这根据当前是正在运行LED还是停止LED流水决定。转移到不同状态之后就会发送不同的预设字符。将"RUN"或者"PAUSE"发送完成之后一次发送逻辑执行完成。
+                    </p>
+                    <p class="text">
+                        接收状态转移图如下：
+                    </p>
+                    <div class="wrap-figure">
+                        <img  class="figure" src="assets/img/receive-state.png" alt="接收状态转移图">
+                    </div>
+
+
+
+                </div>
 
             </div>
             <div class="section-tailer"></div>
@@ -325,11 +1203,12 @@ endmodule
 
     <div class="wrap-tailer">
         <p><code class="segment">powered by MekLi</code></p>
-        <p><code class="segment">source on github: <a href="https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report">https://github.com/MekCraft-Lab/docs-lab</a></code></p>
+        <p><code class="segment">source on github: <a
+                href="https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report">https://github.com/MekCraft-Lab/docs-lab</a></code>
+        </p>
     </div>
 
     <script src="script/js/prism.js"></script>
-    <script src="https://unpkg.com/prismjs/plugins/rainbow-brackets/prism-rainbow-brackets.min.js"></script>
 
 </div>
 </body>

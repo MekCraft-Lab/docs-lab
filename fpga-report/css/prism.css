@@ -58,7 +58,8 @@ pre[class*="language-"] {
 
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
-    background-image: linear-gradient(to left bottom, rgba(105, 91, 214, 0.1) 0, rgba(105, 91, 214, 0) 500px, rgba(225, 83, 98, 0) 70%, rgba(225, 83, 98, 0.1) 100%);
+    /*background-image: linear-gradient(to left bottom, rgba(103, 2, 153, 0.1) 0, rgba(102, 2, 153, 0.05) 500px, rgba(225, 83, 98, 0.02) 70%, rgba(201, 2, 55, 0.1) 100%);*/
+    background: #fafafa;
 }
 
 /* Inline code */
