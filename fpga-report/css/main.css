@@ -10,6 +10,8 @@
 
 @import url("tailer.css");
 
+@import url("background.css");
+
 .wrap-root {
     position: absolute;
     transform: translate(-50%, 0);
