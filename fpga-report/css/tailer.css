@@ -32,7 +32,7 @@
 
 }
 
-.wrap-logo {
+.wrap-power {
     position: absolute;
     top: 25px;
     left: 30px;
@@ -47,7 +47,7 @@
 
 }
 
-.wrap-logo::after {
+.wrap-power::after {
     content: "";
     position: absolute;
     top: 0;
