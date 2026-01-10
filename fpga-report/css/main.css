@@ -17,6 +17,10 @@
     transform: translate(-50%, 0);
     left: 50%;
     top: 0;
-    background-color: #fff;
+    background:
+            linear-gradient(120deg, rgba(255,255,255,.3), rgba(255,255,255,.3)),
+            url("../assets/img/background/771d474c-fe47-4e4e-9112-26ec3b0f3f66.jpg") 0   0   / 100% 33% no-repeat,
+            url("../assets/img/background/771d474c-fe47-4e4e-9112-26ec3b0f3f66.jpg") 0 33% / 100% 66% no-repeat,
+            url("../assets/img/background/771d474c-fe47-4e4e-9112-26ec3b0f3f66.jpg") 0 66% / 100% 100% no-repeat;
     width: 800px;
- }
+}

@@ -1,16 +1,12 @@
 
-
 .wrap-document {
     position: relative;
 
     .section-background {
-        background-image: linear-gradient(#fff 0, rgb(250, 250, 250) 100%);
-
         .section-header {
             position: relative;
             height: 50px;
-            margin: 100px 0 80px 80px;
-            background-image:linear-gradient(to right, #07386a 0, rgba(250, 250, 250, 0) 100%) ;
+            margin: 0 0 20px 80px;
             left: 0;
 
             .section-number {
@@ -18,7 +14,11 @@
                 left: 0;
                 height: 100%;
                 width: 80px;
-                background-color: #b6d35a;
+                bottom: -30px;
+                z-index: 3;
+                border-radius: 8px;
+                /*background-color: #b6d35a;*/
+                background-image: linear-gradient(to right bottom, #b6d35a 0, rgba(182, 211, 90, 0.8) 80%, rgba(182, 211, 90, 0.2) 100%);
                 font-size: 40px;
                 color: #fff;
                 font-weight: bold;
@@ -31,21 +31,47 @@
 
         .wrap-section {
             margin: 0 80px 0 80px;
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.0);
+        }
+
+        .wrap-section::before {
+            content: "";
+            position: absolute;
+            inset: -12px;
+            z-index: -1;
+            background: linear-gradient(
+                    to bottom right,
+                    rgba(255, 255, 255, .62),
+                    rgba(255, 255, 255, .78)
+            );
+
+            backdrop-filter: blur(20px) saturate(120%);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
         }
 
         .section-tailer {
             position: relative;
-            height: 30px;
+            height: 100px;
         }
     }
 
     /* 标题样式 */
+
     .section-title {
+
+        text-align: center;
+        line-height: 200px;
+        height: 200px;
         color: #b6d35a;
         font-size: 50px;
         font-weight: 100;
         margin: 0 0 30px 0;
     }
+
+
     .wrap-content {
 
     }
@@ -59,16 +85,18 @@
 
 .intext {
     font-family: "Maple Mono NF CN ExtraLight", monospace;
-    margin: 6px;
 
     font-size: 15px;
-    border: 1px solid #bbb;
     border-radius: 4px;
+
+    background-color: #aababa;
+    color: white;
+    padding: 0 5px 0 5px;
 }
 
 .wrap-code-segment {
     position: relative;
-    transform:translate(-50%, 0);
+    transform: translate(-50%, 0);
     left: 50%;
     width: 760px;
 }
@@ -81,17 +109,58 @@
     font-family: sans-serif;
 }
 
-#section-1 {
+.wrap-interface {
+    .box-interface {
+        margin: 10px 5% 10px 5%;
+        width: 90%;
+        height: auto;
+
+        /* ⬇️ Grid 替代 Flex */
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        column-gap: 12px;
+        padding: 0 8px 0 8px;
+        justify-content: center;
+        align-items: center;
+
+
+        border-radius: 20px;
+        box-shadow: 8px 8px 4px -3px rgba(0, 0, 0, 0.15);
+
+        .key {
+            height: 24px;
+            background: white;
+            border-radius: 12px;
+
+            text-align: center;
+            font-family: "Maple Mono NF CN ExtraLight", monospace;
+        }
+
+        .value {
+            height: 100%;
+            color: #ffffff;
+        }
+    }
+
 
 }
-#section-2 {
-    background-color: rgb(250, 250, 250);
+.input {
+    .box-interface {
+        background: rgba(200, 161, 197, 0.8);
+    }
 }
+
+.output {
+    .box-interface {
+        background: rgba(161, 200, 195, 0.8);
+    }
+}
+
 
 #paragraph-1 {
     .wrap-content {
         .wrap-list {
-            margin:30px 80px 30px 80px;
+            margin: 30px 80px 30px 80px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -102,10 +171,12 @@
                 text-align: center;
             }
         }
-         #list1.wrap-list span{
-             width: 25%;
+
+        #list1.wrap-list span {
+            width: 25%;
         }
-        #list2.wrap-list span{
+
+        #list2.wrap-list span {
             width: 33%;
         }
     }

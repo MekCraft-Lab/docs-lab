@@ -131,28 +131,51 @@
                 <p class="text">
                     从整体框架示意图中可以很清楚地看出整个系统的输入与输出。系统需要的输入有：
                 </p>
-                <ul>
-                    <li><code class="intext" style="color:blue;">clk</code> <br/> 系统时钟</li>
-                    <li><code class="intext" style="color:blue;">rstIn</code> <br/> 外部复位信号</li>
-                    <li><code class="intext" style="color:blue;">btn1</code> <br/>外部按键信号1，用来控制流水灯的模式的按键
-                    </li>
-                    <li><code class="intext" style="color:blue;">btn2</code> <br/>外部按键信号2，用来控制流水灯的暂停的按键
-                    </li>
-                    <li><code class="intext" style="color:blue;">rx</code> <br/>UART接收引脚</li>
-                </ul>
-                <p class="text">
-                    芯片可以通过系统时钟与复位按键完成时序逻辑，并且通过处理外部的两个按键信号以及通过对UART引脚电平的处理接收UART数据，除此之外，芯片还需要发送UART数据以及控制4个LED，这些功能通过两个输出完成
-                </p>
-                <ul>
-                    <li><code class="intext" style="color:blue;">tx</code><br>UART发送引脚</li>
-                    <li><code class="intext" style="color:blue;">led</code><br>LED控制引脚</li>
-                </ul>
-                <p class="text">
-                    整体功能运行过程大致为：Tick模块产生周期脉冲，控制LED模块管理LED状态的位移。这两个模块共同完成流水灯的功能。UART的通信则是通过UART模块与UART-TX，UART-RX两个子模块共同完成。按键的检测处理由Key模块完成。
-                    这些模块的运行状态，或者说整个系统的运行状态都由FSM模块控制，Key模块通过将按键电平信号转为事件向FSM模块发送外部输入，UART模块通过UART-RX子模块实现外部UART的输入，并且将输入数据发送到FSM处。FSM负责处理这些事件，解析串口数据，调整流水灯运行模式，
-                    以及控制Tick模块的运行周期，并且使UART模块通过UART-TX模块将状态信息发送回上位机，完成整个任务要求。
-                </p>
-                <div class="wrap-code-segment">
+
+                <div class="wrap-interface input">
+                    <div class="box-interface">
+                        <div class="key">clk</div>
+                        <div class="value"><p class="value-text">系统时钟</p></div>
+                    </div>
+                    <div class="box-interface">
+                        <div class="key">rstIn</div>
+                        <div class="value"><p class="value-text">外部复位信号</p></div>
+                    </div>
+                    <div class="box-interface">
+                        <div class="key">btn1</div>
+                        <div class="value"><p class="value-text">外部按键信号1，用来控制流水灯的模式的按键</p></div>
+                    </div>
+                    <div class="box-interface">
+                        <div class="key">btn2</div>
+                        <div class="value"><p class="value-text">外部按键信号2，用来控制流水灯的暂停的按键</p></div>
+                    </div>
+                    <div class="box-interface">
+                        <div class="key">rx</div>
+                        <div class="value"><p class="value-text">UART接收引脚</p></div>
+                    </div>
+
+
+                    <p class="text">
+                        芯片可以通过系统时钟与复位按键完成时序逻辑，并且通过处理外部的两个按键信号以及通过对UART引脚电平的处理接收UART数据，除此之外，芯片还需要发送UART数据以及控制4个LED，这些功能通过两个输出完成
+                    </p>
+
+                    <div class="wrap-interface output">
+                        <div class="box-interface">
+                            <div class="key">tx</div>
+                            <div class="value"><p class="value-text">UART发送引脚</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">led</div>
+                            <div class="value"><p class="value-text">LED控制引脚</p></div>
+                        </div>
+                    </div>
+
+                    <p class="text">
+                        整体功能运行过程大致为：Tick模块产生周期脉冲，控制LED模块管理LED状态的位移。这两个模块共同完成流水灯的功能。UART的通信则是通过UART模块与UART-TX，UART-RX两个子模块共同完成。按键的检测处理由Key模块完成。
+                        这些模块的运行状态，或者说整个系统的运行状态都由FSM模块控制，Key模块通过将按键电平信号转为事件向FSM模块发送外部输入，UART模块通过UART-RX子模块实现外部UART的输入，并且将输入数据发送到FSM处。FSM负责处理这些事件，解析串口数据，调整流水灯运行模式，
+                        以及控制Tick模块的运行周期，并且使UART模块通过UART-TX模块将状态信息发送回上位机，完成整个任务要求。
+                    </p>
+                    <div class="wrap-code-segment">
                     <pre class="line-numbers"><code class="lang-verilog">
 `timescale 1ns / 1ps
 /**
@@ -340,1025 +363,49 @@ module top #(
 endmodule
 
                     </code></pre>
-                </div>
-                <p class="text">
-                    通过定义 <code class="intext">CLK_FREQ</code>与 <code class="intext">BUAD_RATE</code>可以快速调节系统主频与波特率需求。下层的这些模块的重要初始化量都是通过这些参数进行配置，并且会被上层文件的同名参数覆盖。这么做的原因是当时借用了别的型号的板子进行测试，为了让代码能够在两个板子上快速完全地切换，通过定义参数的方式快速调整平台。
-                </p>
-                <p class="text">
-                    并且两个板子的按键电平不一样，对于复位信号的调整也需要进行处理。因此将外部的复位按键状态与系统模块的复位信号分离开，内部模块只按照系统内的复位信号的有效值为准，有效值固定高电平，不会改变，需要改变的是内部信号与外部复位按键状态的组合逻辑，通过调节
-                    <code class="intext">rstIn</code>与 <code class="intext">rst</code>的组合逻辑关系，可以快速地适配不同的按键结构。
-                </p>
-
-            </div>
-
-            <div class="section-tailer"></div>
-        </div>
-
-        <div class="section-background" id="section-3">
-            <div class="section-header">
-                <div class="section-number">
-                    03
-                </div>
-            </div>
-            <div class="wrap-section" id="paragraph-3">
-                <h1 class="section-title">
-                    流水灯控制
-                </h1>
-
-                <h2 class="subsection-title">I. LED模块</h2>
-                <div class="wrap-subsection">
-                    <p>LED模块一共对外暴露了六个信号接口</p>
-                    <ul>
-                        <li><code style="font-size: 15px; color: blue;" class="intext">clk</code> <br/>系统时钟，LED
-                            模块的系统同步时钟信号，用于驱动模块内部所有时序逻辑的更新
-                        </li>
-                        <li><code style="font-size: 15px; color: blue;" class="intext">rst</code><br/> 模块复位信号，用于将
-                            LED 模块内部状态初始化至预定义的初始状态。
-                        </li>
-                        <li><code style="font-size: 15px; color: blue;" class="intext">tick</code><br/> LED
-                            显示状态切换的触发信号，用于指示 LED 模块在当前时钟周期执行一次显示更新操作。每当<code
-                                    class="intext">tick</code> 有效时，模块根据当前工作模式对 LED 显示状态进行更新。
-                        </li>
-                        <li><code style="font-size: 15px; color: blue;" class="intext">mode</code><br/> 用于指示当前 LED
-                            的流水模式，不同的模式对应不同的 LED 流水或显示策略。模块根据 <code class="intext">mode</code>
-                            的取值选择相应的显示逻辑，并在 <code class="intext">tick</code>信号到达时更新 LED 状态。
-                        </li>
-                        <li><code style="font-size: 15px; color: blue;" class="intext">suspend</code><br/> LED
-                            显示挂起控制信号。当该信号有效时，LED 模块保持当前显示状态不变，忽略 <code
-                                    class="intext">tick</code> 信号，从而实现 LED 显示的暂停功能
-                        </li>
-                        <li><code style="font-size: 15px; color: blue;" class="intext">ledArr</code><br/> led
-                            array的意思，LED 控制输出信号，用于驱动外部 LED 硬件。该信号反映 LED 模块当前内部显示状态，其取值由
-                            <code class="intext">tick</code>、<code class="intext">mode</code> 及 <code class="intext">suspend</code>
-                            等控制信号共同决定。
-                        </li>
-                    </ul>
-
-                    <div class="wrap-code-segment ">
-                    <pre class="line-numbers"><code class="language-verilog rainbow-braces">
-`timescale 1ns / 1ps
-/**
- *******************************************************************************
- * @file    led.v
- * @brief   LED模块文件,负责LED模块的状态切换
- *******************************************************************************
- * @attention
- *
- * none
- *
- *******************************************************************************
- * @note
- *
- * =============================================================================
- *  input
- * =============================================================================
- *
- * (+) clk:     系统时钟信号
- * (+) rst:     复位信号，高电平有效
- * (+) tick:    LED切换信号，上升沿有效
- * (+) mode:    LED状态，取值[0, 1, 2]有效
- * (+) suspend: LED切换挂起信号，高电平有效
- *
- * =============================================================================
- *  output
- * =============================================================================
- *
- * (+) ledArr:  LED控制信号输出
- *
- *******************************************************************************
- * @author  张晨 & 施云峰
- * @date    2025/12/19
- * @version 1.0
- *******************************************************************************
- */
-
-
-module led (
-
-    input wire clk,
-    input wire rst,
-
-    input wire       tick,
-    input wire [2:0] mode,
-    input wire       suspend,
-
-    output reg [3:0] ledArr
-);
-
-
-    /* ----------- 1. Internal Signals ---------------------------------------*/
-
-    reg lastTick;
-    reg direction;
-
-
-
-    /* ----------- 2. Sub-Modules --------------------------------------------*/
-
-
-
-
-
-
-    /* ----------- 3. Combinational Logic ------------------------------------*/
-
-
-
-
-
-
-    /* ----------- 4. Sequential Logic ---------------------------------------*/
-
-    always @(posedge clk or posedge rst) begin
-
-        if (rst) begin
-
-            lastTick  <= 1'b0;
-            direction <= 1'b0;
-            ledArr    <= 4'b0000;
-
-        end else begin
-
-            if (ledArr == 4'b0000) begin
-                ledArr <= 4'b0001;
-            end
-
-            lastTick <= tick;
-
-
-            if (!suspend && (~lastTick & tick)) begin
-
-                case (mode)
-
-                    // 模式0 向左移动
-                    2'b00: begin
-                        direction <= 1;
-                        ledArr <= {
-                            ledArr[2:0],
-                            ledArr[3]
-                        };  // 循环左移
-                    end
-
-                    // 模式1 向右移动
-                    2'b01: begin
-
-                        // 最好同步调整跑马灯时候的方向设置
-                        direction <= 0;
-                        ledArr <= {
-                            ledArr[0],
-                            ledArr[3:1]
-                        };
-                    end
-
-                    // 模式2 跑马灯
-                    2'b10: begin
-
-                        ledArr <=
-                            direction
-                                ? ( {ledArr[0], ledArr[3: 1]})
-                                : ({ledArr[2: 0], ledArr[3]});
-
-
-                        direction <=
-                            (ledArr == 4'b0100)
-                                ? 1
-                                : ((ledArr == 4'b0010)
-                                    ? 0
-                                    : direction);
-
-                    end
-
-                    default: ;
-                endcase
-
-            end
-        end
-    end
-
-endmodule
-                    </code></pre>
-
                     </div>
                     <p class="text">
-                        LED模块的功能很清晰，就是在判断当前没有被停止的状态下，在mode信号的指导下，基于tick信号触发进行LED的状态切换。
-                        模块内有两个内部信号分别是lastTick与direction，具体功能在下文描述。
-                        时序逻辑也非常简单，最先判断rst复位信号是否有效，如果不是在复位状态判断led是否都是灭的。因为之后的所有逻辑都是通过对ledArr进行循环位移实现的而不是直接赋值，所以刚刚复位之后，在所有灯都是灭的时候，需要单独判断一下，并且手动直接赋值，点亮其中一颗LED。点亮之后就是通过lastTick内部信号与tick信号判断是否存在上升沿。如果有上升沿，说明该进行一次LED的状态切换。通过判断mode的值进入不同的控制分支。
+                        通过定义 <code class="intext">CLK_FREQ</code>与 <code class="intext">BUAD_RATE</code>可以快速调节系统主频与波特率需求。下层的这些模块的重要初始化量都是通过这些参数进行配置，并且会被上层文件的同名参数覆盖。这么做的原因是当时借用了别的型号的板子进行测试，为了让代码能够在两个板子上快速完全地切换，通过定义参数的方式快速调整平台。
                     </p>
-                    <p class="text">
-                        0模式下控制LED的语句如下：
-                    </p>
-                    <pre class="line-numbers"><code class="language-verilog">ledArr <= {ledArr[2: 0], ledArr[3]}; // 循环左移</code></pre>
-
-                    <p class="text">
-                        语句可以将原本ledArr的低三位移动到高三位，并且将最高位移动到最低位，完成一次循环左移。这样的操作要比通过加减计数值判断点亮第几颗灯逻辑上更加简单，更加安全，不容易出错。1模式下进行LED右移的操作是一样的。在2模式下则需要先对direction进行判断，direction就是用来记录当前LED移动方向的变量。对于direction的控制则需要特殊注意：
-                    </p>
-                    <pre class="line-numbers"><code class="language-verilog">
-                        direction <=
-                            (ledArr == 4'b0100)
-                                ? 1
-                                : ((ledArr == 4'b0010)
-                                    ? 0
-                                    : direction);
-                </code></pre>
-                    <p class="text">
-                        如果当前的ledArr为0100也就是在下一次就要移动到边沿的时候就需要提前进行direction的改变。如果在1000时候再控制direction切换方向实际上已经迟了。因为时序逻辑的<=操作都是并行操作，当1000时修改完direction之后LED的切换依旧是基于旧的direction。因此需要在边沿的上一个LED进行direction从左向右的改变。当LED移动到右边沿时候同理。因此判断的时候通过两个三元操作符先后判断了当前是否是0100与0010状态而不是1000与0001。
-                        在mode为0或者1的时候的切换不需要依据direction。但是在这两个模式下的分支依然做了direction的赋值操作。为的是能够让LED在从0模式或者1模式切换到2模式的时候，能够保持上一个模式的状态。如果不这样做，direction里保持的是上一次2模式下的状态，如果上一次2模式在向右移动的时候被切换到了0模式，开始向左移动。再切换回到2模式的时候并不会继续向左，而是基于direction突然改变方向向右移动。因此为了让LED的移动更加顺滑，去除这些突兀的转移，在0模式与1模式中也对direction进行了处理。
-                    </p>
-
-                </div>
-
-                <h2 class="subsection-title">II. Tick模块</h2>
-                <div class="wrap-subsection">
-                    <p class="text">
-                        tick 模块用于在任意时钟 clkIn 的基础上，根据外部配置的分频系数 periodMs 产生一个分频脉冲信号
-                        clkOut。
-                        该节拍信号用于驱动 LED
-                        状态更新等周期性事件，从而实现可配置周期的事件触发机制。在LED的流水切换与UART的采样上都需要用到时钟分频，本身打算都使用tick模块提供。后来UART舍弃了外部的时钟触发方式，内部自行实现采样时钟。
-
-                    </p>
-                    <ul>
-                        <li><code style="color: blue;" class="intext">clkIn</code> <br/>模块的时钟输入，分频之前的信号
-                        </li>
-                        <li><code style="color: blue;" class="intext">rst</code> <br/>复位信号，清空计数寄存器</li>
-                        <li><code style="color: blue;" class="intext">periodMs</code> <br/> 32位，分频系数</li>
-                        <li><code style="color: blue;" class="intext">clkOut</code> <br/>模块的时钟输出，输出信号为以periodMs为周期的脉冲
-                        </li>
-                    </ul>
-                    <div class="wrap-code-segment">
-                        <pre class="line-numbers"><code class="lang-verilog">
-                            `timescale 1ns / 1ps
-/**
- *******************************************************************************
- * @file    tick.v
- * @brief   Tick模块，用于时钟分频
- *******************************************************************************
- * @attention
- *
- * none
- *
- *******************************************************************************
- * @note
- *
- * =============================================================================
- *  input
- * =============================================================================
- *
- * (+) clkIn:   分频前时钟
- * (+) rst:     复位信号，高电平有效
- * (+) preiodMs:分频系数
- *
- * =============================================================================
- *  output
- * =============================================================================
- *
- * (+) clkOut:  分频之后的脉冲
- *
- *******************************************************************************
- * @author  张晨 & 施云峰
- * @date    2025/12/19
- * @version 1.0
- *******************************************************************************
- */
-
-
-module tick(
-    input  wire        clkIn,
-    input  wire        rst,
-    input  wire [31:0] periodMs,
-    output reg         clkOut
-);
-
-
-    /* ----------- 1. Internal Signals ---------------------------------------*/
-
-    reg [31:0] cnt;
-
-
-
-
-    /* ----------- 2. Sub-Modules --------------------------------------------*/
-
-
-
-
-
-
-    /* ----------- 3. Combinational Logic ------------------------------------*/
-
-
-
-
-
-
-    /* ----------- 4. Sequential Logic ---------------------------------------*/
-    always @(posedge clkIn or posedge rst) begin
-
-        // 复位键按下
-        if (rst) begin
-
-            cnt    <= 0;
-            clkOut <= 1'b0;
-
-        end else if (cnt >= periodMs) begin
-
-            cnt    <= 0;
-            clkOut <= 1'b1;
-
-        end else begin
-
-            cnt    <= cnt + 1;
-            clkOut <= 1'b0;
-
-        end
-
-    end
-
-
-
-
-
-endmodule
-
-                        </code></pre>
-                    </div>
-                    <p class="text">
-                        tick模块首先判断复位信号是否有效，如果不是复位状态，则进行计数，当计数值达到periodMs之后，将脉冲输出拉高一个时钟，然后清空计数，拉低输出，开始下一个循环
-                    </p>
-                </div>
-
-
-            </div>
-            <div class="section-tailer"></div>
-        </div>
-
-        <div class="section-background" id="section-4">
-            <div class="section-header"><div class="section-number">04</div></div>
-            <div class="wrap-section" id="paragraph-4">
-                <h1 class="section-title">按键处理</h1>
-                <h2 class="subsection-title">III. Key模块</h2>
-                <div class="wrap-subsection">
-                    <p class="text">
-                        key 模块用于对来自物理按键的输入信号进行同步、防抖处理，并最终输出稳定可靠的按键事件脉冲信号。
-                        由于机械按键在按下与释放过程中会产生明显的抖动现象，若直接将按键输入用于状态机或控制逻辑，易引发误触。因此，本模块通过多级同步、计数延时确认以及边沿检测的方式，对按键信号进行完整的时序处理。
-                        在本工程中，key 模块将物理按键行为抽象为单周期有效的事件信号，供系统状态机（FSM）使用，从而避免上层逻辑直接处理异步、抖动的硬件信号，降低系统复杂度。
-                    </p>
-
-                    <ul>
-                        <li><code style="color: blue" class="intext">clk</code> <br/>模块的系统时钟输入信号，用于驱动按键同步寄存器、防抖计数器以及边沿检测逻辑，保证所有处理均在统一时钟域内完成。
-                        </li>
-                        <li><code style="color: blue" class="intext">rst</code> <br/>高有效复位信号，用于清空内部同步寄存器、计数器及历史状态寄存器，确保系统复位后按键状态处于确定初始值。
-                        </li>
-                        <li><code style="color: blue" class="intext">btn1</code> <br/>物理按键 1
-                            的原始输入信号，属于异步信号，可能包含抖动与毛刺，需要经过同步与防抖处理。
-                        </li>
-                        <li><code style="color: blue" class="intext">btn2</code> <br/>物理按键 2 的原始输入信号，处理流程与
-                            btn1 完全一致，实现方式上保持对称，便于后续功能扩展。
-                        </li>
-                        <li><code style="color: blue" class="intext">key1</code> <br/>按键 1 的防抖后事件输出信号。当检测到
-                            btn1 状态由低变高并稳定保持超过设定防抖时间后，输出一个单时钟周期宽度的上升沿脉冲，用于触发上层控制逻辑。
-                        </li>
-                        <li><code style="color: blue" class="intext">key2</code> <br/>按键 2 的防抖后事件输出信号，输出形式与
-                            key1 相同，同样为单周期有效的上升沿脉冲信号。
-                        </li>
-                    </ul>
-                    <div class="wrap-code-segment">
                     <pre class="line-numbers"><code class="lang-verilog">
-`timescale 1ns / 1ps
-/**
- *******************************************************************************
- * @file    key.v
- * @brief   按键模块，用于处理按键电平并产生事件
- *******************************************************************************
- * @attention
- *
- * none
- *
- *******************************************************************************
- * @note
- *
- * =============================================================================
- *  input
- * =============================================================================
- *
- * (+) clk:     系统时钟信号
- * (+) rst:     复位信号，高电平有效
- * (+) btn1:    物理按键引脚1
- * (+) btn2:    物理按键引脚2
- *
- * =============================================================================
- *  output
- * =============================================================================
- *
- * (+) key1:    物理按键1触发事件，上升沿有效
- * (+) key2:    物理按键2触发事件，上升沿有效
- *
- *******************************************************************************
- * @author  杨紫翔
- * @date    2025/12/19
- * @version 1.0
- *******************************************************************************
- */
-module key (
-    input wire clk,
-    input wire rst,   // 高有效复位
-    input wire btn1,
-    input wire btn2,
 
-    output reg key1,  // 防抖后的上升沿脉冲
-    output reg key2
-);
+    uart #(
 
-    /* ----------- 1. Internal Signals ---------------------------------------*/
+        .CLK_FREQ (CLK_FREQ),
+        .BUAD_RATE(BUAD_RATE)
 
-    parameter integer DEBOUNCE_CNT = 500_000;  // 10ms @125MHz
-
-
-    reg btn1_ff1, btn1_ff2;
-    reg btn2_ff1, btn2_ff2;
-
-    reg [$clog2(DEBOUNCE_CNT):0] cnt1;
-    reg [$clog2(DEBOUNCE_CNT):0] cnt2;
-
-
-    reg btn1_stable;
-    reg btn2_stable;
-
-    reg btn1_last;
-    reg btn2_last;
-
-
-    /* ----------- 2. Sub-Modules --------------------------------------------*/
-
-
-
-
-
-
-    /* ----------- 3. Combinational Logic ------------------------------------*/
-
-
-
-
-
-
-    /* ----------- 4. Sequential Logic ---------------------------------------*/
-
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            btn1_ff1 <= 1'b0;
-            btn1_ff2 <= 1'b0;
-            btn2_ff1 <= 1'b0;
-            btn2_ff2 <= 1'b0;
-        end else begin
-            btn1_ff1 <= btn1;
-            btn1_ff2 <= btn1_ff1;
-            btn2_ff1 <= btn2;
-            btn2_ff2 <= btn2_ff1;
-        end
-    end
-
-
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            cnt1        <= 0;
-            cnt2        <= 0;
-            btn1_stable <= 1'b0;
-            btn2_stable <= 1'b0;
-        end else begin
-            // ---- btn1 ----
-            if (btn1_ff2 == btn1_stable) cnt1 <= 0;
-            else if (cnt1 < DEBOUNCE_CNT) cnt1 <= cnt1 + 1'b1;
-            else begin
-                cnt1        <= 0;
-                btn1_stable <= btn1_ff2;
-            end
-
-            // ---- btn2 ----
-            if (btn2_ff2 == btn2_stable) cnt2 <= 0;
-            else if (cnt2 < DEBOUNCE_CNT) cnt2 <= cnt2 + 1'b1;
-            else begin
-                cnt2        <= 0;
-                btn2_stable <= btn2_ff2;
-            end
-        end
-    end
-
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            btn1_last <= 1'b0;
-            btn2_last <= 1'b0;
-            key1      <= 1'b0;
-            key2      <= 1'b0;
-        end else begin
-            key1 <= (~btn1_last) & btn1_stable;  // 上升沿
-            key2 <= (~btn2_last) & btn2_stable;
-
-            btn1_last <= btn1_stable;
-            btn2_last <= btn2_stable;
-        end
-    end
-
-endmodule
-
+    )
                     </code></pre>
-                    </div>
+
+                    <pre class="line-numbers"><code class="lang-verilog">
+    fsm #(
+        .CLK_FREQ (CLK_FREQ), /*主时钟频率 */
+        .PERIOD_MS(500)       /* 周期 */
+    )
+                    </code></pre>
+                    <p class="text">
+                        并且两个板子的按键电平不一样，对于复位信号的调整也需要进行处理。因此将外部的复位按键状态与系统模块的复位信号分离开，内部模块只按照系统内的复位信号的有效值为准，有效值固定高电平，不会改变，需要改变的是内部信号与外部复位按键状态的组合逻辑。
+
+                    <pre class="line-numbers"><code class="lang-verilog">
+                            assign rst = rstIn;
+                    </code></pre>
 
                     <p class="text">
-                        模块定义了一个局部参数 <code class="intext">DEBOUNCE_CNT</code>用于记录按键的有效时间。这个局部参数不能被上层修改。
+                        通过调节
+                        <code class="intext">rstIn</code>与 <code class="intext">rst</code>的组合逻辑关系，可以快速地适配不同的按键结构。
+
                     </p>
-                    <p class="text">
-                        通过系统函数 <code class="intext">$clog2(DEBOUNCE_CNT)</code>自动计算出用于延时的计数器需要的位数。
-                    </p>
-                    <p class="text">
-                        Key模块主要由三个时序逻辑组成
-                    </p>
-                    <p class="text">
-                        第一个时序逻辑负责判断复位信号以及两级按键电平的状态保存。
-                        第二个时序中，如果 <code class="intext">ff2</code> <code class="intext">stable</code>，意味着已经重新开始一次新的触发，开始
-                        <code class="intext">cnt</code>数器的计数，直至达到预设延时时间，在这期间如果 <code
-                            class="intext">ff2</code>为抖动重新回到了上一个电平状态，意味着 <code
-                            class="intext">ff2</code> <code class="intext">stable</code>等，将会将计数器 <code
-                            class="intext">cnt</code>空，重新准备计时。如果稳定地等到了计数完成，则认为是一次有效的电平转换，重新改变
-                        <code class="intext">stable</code>的值并清空</code class="intext">cnt</code>准备下一次的计数。
-                        第三个时序负责初始事件输出与物理按键电平之间的关系。通过不断检测 <code
-                            class="intext">stable</code> <code class="intext">last</code>值判断是否产生上升沿。如果存在上升沿则拉高
-                        <code class="intext">key</code>，输出按键事件脉冲，随后拉低 <code class="intext">key</code>
-                    </p>
+
                 </div>
+
+                <div class="section-tailer"></div>
             </div>
-            <div class="section-tailer"></div>
-        </div>
-
-        <div class="section-background" id="section-5">
-            <div class="section-header"><div class="section-number">05</div></div>
-            <div class="wrap-section" id="paragraph-5">
-                <h1 class="section-title">UART控制</h1>
-                <h2 class="subsection-title">V. UART-TX模块</h2>
-                <div class="wrap-subsection">
-                    <p class="text">
-                        UART-TX模块主要是用于在接收到使能信号之后将8位数据寄存器内的数据以UART的方式发送出去。并且在发送过程中拉低状态信号表示忙碌，在发送完成之后拉高状态信号通知其他上层模块,模块
-                        暴露的接口有
-                    </p>
-                    <ul>
-                        <li><code class="intext" style="color: blue;">clk</code> <br/> 用于时序逻辑的时钟</li>
-                        <li><code class="intext" style="color: blue;">rst</code> <br/> 复位信号</li>
-                        <li><code class="intext" style="color: blue;">tData</code> <br/> 数据缓冲区，使能之后，将缓冲区内的数据存入寄存器中发送
-                        </li>
-                        <li><code class="intext" style="color: blue;">tValid</code> <br/>
-                            发送使能信号，当信号出现一个周期的高电平脉冲之后触发模块开始数据发送
-                        </li>
-                        <li><code class="intext" style="color: blue;">tReady</code> <br/>
-                            状态信号，拉高表示处于准备发送数据的状态，拉低表示当前正在发送事务中
-                        </li>
-                        <li><code class="intext" style="color: blue;">txd</code> <br/> 发送使用的引脚，串口的发送引脚
-                        </li>
-                        <li><code class="intext" style="color: blue;">prescale</code> <br/>
-                            分频系数，用于控制发送时候的单bit时间宽度，从而控制UART发送的波特率
-                        </li>
-                        <li><code class="intext" style="color: blue;">busy</code> <br/>用于表示忙碌状态的信号</li>
-                    </ul>
-
-                    <div class="wrap-code-segment">
-                        <pre class="line-numbers"><code class="lang-verilog">
-`timescale 1ns / 1ps
-/**
- *******************************************************************************
- * @file    uart-tx.v
- * @brief   用于将数据寄存器中的数据通过txd发送出去
- *******************************************************************************
- * @attention
- *
- * tValid使能信号只能拉高一个时钟周期，不能持续拉高
- *
- *******************************************************************************
- * @note
- *
- * =============================================================================
- *  input
- * =============================================================================
- *
- * (+) clk:     系统时钟信号
- * (+) rst:     复位信号，高电平有效
- * (+) tData:   发送数据
- * (+) tValid:  发送使能信号
- * (+) prescale:波特率分频系数
- *
- * =============================================================================
- *  output
- * =============================================================================
- *
- * (+) txd:     串口发送引脚
- * (+) tReady:  发送准备完成
- * (+) busy:    忙碌状态信号
- *
- *******************************************************************************
- * @author  李牧泽
- * @date    2025/12/19
- * @version 1.0
- *******************************************************************************
- */
-module uartTx #(
-    parameter DATA_WIDTH = 8
-) (
-    input  wire                  clk,
-    input  wire                  rst,
-    /* input */
-    input  wire [DATA_WIDTH-1:0] tData,
-    input  wire                  tValid,
-    output wire                  tReady,
-    /* UART Interface */
-    output wire                  txd,
-    input  wire [          31:0] prescale,
-    output wire                  busy
-);
-
-
-
-    /* ----------- 1. Internal Signals ---------------------------------------*/
-
-    reg tReadyReg = 0;
-    reg txdReg = 0;
-    reg busyReg = 0;
-    reg [DATA_WIDTH:0] dataReg = 0;
-    reg [31:0] prescaleReg = 0;
-    reg [3:0] bitCnt = 0;
-
-
-
-
-    /* ----------- 2. Sub-Modules --------------------------------------------*/
-
-
-
-
-
-
-
-    /* ----------- 3. Combinational Logic ------------------------------------*/
-
-    assign tReady = tReadyReg;
-    assign txd    = txdReg;
-    assign busy   = busyReg;
-
-
-
-    /* ----------- 4. Sequential Logic ---------------------------------------*/
-
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            tReadyReg    <= 0;
-            txdReg      <= 1;
-            prescaleReg <= 0;
-            bitCnt      <= 0;
-            busyReg     <= 0;
-        end else begin
-            if (prescaleReg > 0) begin
-
-                tReadyReg    <= 0;
-                prescaleReg <= prescaleReg - 1;
-
-            end else if (bitCnt == 0) begin
-                tReadyReg <= 1;
-                busyReg  <= 0;
-
-                // 逻辑起始
-                if (tValid) begin
-
-                    tReadyReg    <= !tReadyReg;
-                    prescaleReg <= (prescale << 3) - 1;
-                    bitCnt      <= DATA_WIDTH + 1;
-                    dataReg     <= {1'b1, tData};
-                    txdReg      <= 0;
-                    busyReg     <= 1;
-                end
-            end else begin
-                if (bitCnt > 1) begin
-
-                    bitCnt            <= bitCnt - 1;
-                    prescaleReg       <= (prescale << 3) - 1;
-                    {dataReg, txdReg} <= {1'b0, dataReg};
-
-                end else if (bitCnt == 1) begin
-
-                    bitCnt      <= bitCnt - 1;
-                    prescaleReg <= (prescale << 3);
-                    txdReg      <= 1;
-
-                end
-            end
-        end
-    end
-
-
-endmodule
-
-                        </code></pre>
-                    </div>
-
-                    <p class="text">
-                        发送模块没有使用特殊的状态寄存器用于记录串口发送事务的状态转移，而是通过计数的方式自然完成分频与8bit电平发送。
-                    </p>
-                    <p class="text">
-                        <code class="intext">prescaleReg</code>就是用于分频的计数寄存器，<code
-                            class="intext">prescaleReg</code>的时候，并且开没有开始一次发送事务(即 <code class="intext">bitCnt</code>为零),会持续检测
-                        <code class="intext">tValid</code>信号。如果 <code class="intext">tValid</code>被拉高，模块开始一次发送事务
-                    </p>
-                    <p class="text">
-                        进入发送事务首先会开始各种参数的初始化，会将 <code class="intext">tReady</code>信号拉低，表示当前不可开始下一次发送事务，并且开始将分频计数装填到
-                        <code class="intext">prescaleReg</code>中，<code class="intext">bitCnt</code>中存入一次发送事务需要的电平翻转数量，一般是8bit加上一个起始位。并且发送数据被装填到数据寄存器<code
-                            class="intext">dataReg</code>中。
-                    </p>
-                    <p class="text">
-                        <code class="intext">prescaleReg</code>在被装填上分频计数值之后会持续自减，直到归零，并且 <code
-                            class="intext">bitCnt</code>当前不为零，因此会进入发送逻辑， <code
-                            class="intext">bitCnt</code>首先减一，表示完成一位发送，重新装填分频计数器 <code
-                            class="intext">prescaleReg</code>，将数据寄存器 <code class="intext">dataReg</code>中的最低位移出到
-                        <code class="intext">txdReg</code>中，用于控制发送引脚电平。
-                        如果当前的 <code class="intext">bitCnt</code>已经减到1，说明完成所有的数据发送，这时完成重装填之后会将
-                        <code class="intext">txdReg</code>拉高表示停止位。
-                    </p>
-
-                    <p class="text">
-                        当 <code class="intext">prescaleReg</code>与 <code class="intext">bitCnt</code>全部归零之后表示一次发送事务完成，此时模块将
-                        <code class="intext">tReadyReg</code>置位，表示当前可以开始下一次的发送事务。
-                    </p>
-                </div>
-                <h2 class="subsection-title">VI. UART-RX模块</h2>
-                <div class="wrap-subsection">
-                    <p class="text">
-                        UART-RX模块用于串口接收引脚的电平采样，通过8倍过采样检测电平数据，并将采样得到的数据记录到数据缓冲区中，除此之外，接收模块还会通过一些信号向上层发送状态，比如接收事务处理状态，空闲状态，帧错误与帧溢出错误。
-                    </p>
-                    <ul>
-                        <li><code class="intext" style="color:blue">clk</code> <br/> 系统时钟，控制时序逻辑</li>
-                        <li><code class="intext" style="color:blue">rst</code> <br/> 异步复位信号</li>
-                        <li><code class="intext" style="color:blue">rData</code> <br/> 数据接收缓冲区,用于存放接收完成的一帧数据
-                        </li>
-                        <li><code class="intext" style="color:blue">rValid</code> <br/>表示一帧数据没有错误地完整接收到事件，会给上层一个时钟周期的高电平脉冲
-                        </li>
-                        <li><code class="intext" style="color:blue">rReady</code> <br/>上层是否做好数据接收的准备，如果拉高模块就会认为上层已经做好了数据接收的准备
-                        </li>
-                        <li><code class="intext" style="color:blue">rxd</code> <br/> 串口的接收引脚，模块通过采样这个引脚用于数据接收
-                        </li>
-                        <li><code class="intext" style="color:blue">busy</code> <br/> 表示正在一次串口数据接收事务中
-                        </li>
-                        <li><code class="intext" style="color:blue">ore</code> <br/> Over Run
-                            Error，即数据溢出错误，当上层还没有处理完当前的数据时候新的数据接收已经完成时会拉高这个引脚表示溢出错误
-                        </li>
-                        <li><code class="intext" style="color:blue">fe</code> <br/> Frame Error,
-                            帧错误，当接收到的电平不符合UART协议或者波特率等原因导致过采样时候的电平突变等会拉高这个信号表示帧错误
-                        </li>
-                        <li><code class="intext" style="color:blue">idle</code> <br/>
-                            空闲状态，即当接收完成上一个数据之后，超过两个数据帧接受时间的空闲时，认为上层将当前若干数据帧的数据包全部发送完成，触发IDLE信号
-                        </li>
-                        <li><code class="intext" style="color:blue">prescale</code> <br/> 分频系数，用于通过分频控制波特率
-                        </li>
-                    </ul>
-
-                    <div class="wrap-code-segment">
-                        <pre class="line-numbers"><code class="lang-verilog">
-`timescale 1ns / 1ps
-/**
- *******************************************************************************
- * @file    uart-rx.v
- * @brief   在上层处理完数据之前接收信号将会一直拉高
- *******************************************************************************
- * @attention
- *
- * rValid信号为上升沿有效
- *
- *******************************************************************************
- * @note
- *
- * =============================================================================
- *  input
- * =============================================================================
- *
- * (+) clk:     系统时钟信号
- * (+) rst:     复位信号，高电平有效
- * (+) rReady:  判断上层是否处理完成
- * (+) rxd:     数据接收引脚
- * (+) prescale:分频系数
- *
- * =============================================================================
- *  output
- * =============================================================================
- *
- * (+) rData:   数据接收缓冲区
- * (+) rValid:  一次数据接收完成
- * (+) busy:    处理接收事务中
- * (+) ore:     数据溢出错误
- * (+) fe:      帧错误
- * (+) idle:    串口空闲事件
- *
- *******************************************************************************
- * @author  李长龙
- * @date    2025/12/19
- * @version 1.0
- *******************************************************************************
- */
-
-module uartRx #(
-    parameter DATA_WIDTH = 8
-) (
-                        input  wire                    clk,
-                        input  wire                    rst,
-    /*
-        output
-     */
-                        output wire [DATA_WIDTH - 1:0] rData,
-                        output wire                    rValid,
-                        input  wire                    rReady,
-    /*
-        uart interface
-     */
-                        input  wire                    rxd,
-    (* KEEP = "TRUE" *) output wire                    busy,
-                        output wire                    ore,
-                        output wire                    fe,
-                        output wire                    idle,
-                        input  wire [            31:0] prescale
-);
-
-    /* ----------- 1. Internal Signals ---------------------------------------*/
-
-    reg [DATA_WIDTH - 1:0] rDataReg = 0;
-    reg                    rValidReg = 0;
-    reg                    rxdReg = 1;
-    reg                    busyReg = 0;
-    reg                    oreReg = 0;
-    reg                    feReg = 0;
-    reg [  DATA_WIDTH-1:0] dataReg = 0;
-    reg [            31:0] prescaleReg = 0;
-    reg [             3:0] bitCnt = 0;
-    reg                    idleReg = 0;
-    reg [            31:0] idleCounter = 0;
-
-    /* ----------- 2. Sub-Modules --------------------------------------------*/
-
-
-
-
-
-    /* ----------- 3. Combinational Logic ------------------------------------*/
-
-    assign rData  = rDataReg;
-    assign rValid = rValidReg;
-    assign busy   = busyReg;
-    assign fe     = feReg;
-    assign ore    = oreReg;
-    assign idle   = idleReg;
-
-
-
-
-    /* ----------- 4. Sequential Logic ---------------------------------------*/
-
-    always @(posedge clk or posedge rst) begin
-
-        if (rst) begin
-            rDataReg    <= 0;
-            rValidReg   <= 0;
-            rxdReg      <= 0;
-            prescaleReg <= 0;
-            bitCnt      <= 0;
-            busyReg     <= 0;
-            oreReg      <= 0;
-            feReg       <= 0;
-
-        end else begin
-
-            rxdReg <= rxd;
-            oreReg <= 0;
-            feReg  <= 0;
-
-            if (rValid && rReady) begin
-                rValidReg <= 0;
-            end
-
-            // 分频计数
-            if (prescaleReg > 0) begin
-
-                prescaleReg <= prescaleReg - 1;
-
-            end else if (bitCnt > 0) begin
-
-                // 正在处理一帧
-                if (bitCnt > DATA_WIDTH + 1) begin
-
-                    // 起始位判断
-                    if (!rxdReg) begin
-                        // 帧计数-1
-                        bitCnt      <= bitCnt - 1;
-                        // 重装8倍预分频
-                        prescaleReg <= (prescale << 3) - 1;
-
-                    end else begin
-
-                        // rx线上不能为高，否则就是错误判断，伪起始位
-                        bitCnt      <= 0;
-                        prescaleReg <= 0;
-
-                    end
-
-                end else if (bitCnt > 1) begin
-
-                    // 数据位中点采样
-                    bitCnt      <= bitCnt - 1;
-                    prescaleReg <= (prescale << 3) - 1;
-                    dataReg     <= {rxdReg, dataReg[DATA_WIDTH-1:1]};
-
-                end else if (bitCnt == 1) begin
-
-                    // 停止位判断
-                    bitCnt <= bitCnt - 1;
-
-
-                    if (rxdReg) begin
-                        rDataReg  <= dataReg;
-                        rValidReg <= 1;
-                        oreReg    <= rValidReg;
-                    end else begin
-                        feReg <= 1;
-                    end
-
-                end
-            end else begin
-                // 空闲状态，等待起始位
-                busyReg <= 0;
-
-                // 检测到上升沿
-                if (!rxdReg) begin
-
-                    // 重装
-                    prescaleReg <= (prescale << 2) - 2;
-                    bitCnt      <= DATA_WIDTH + 2;
-                    dataReg     <= 0;
-                    busyReg     <= 1;
-                end
-            end
-
-        end
-    end
-
-    // 空闲状态判断，做不定长接收
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            idleCounter <= 0;
-            idleReg     <= 0;
-        end else if (busy) begin
-            idleCounter <= 0;
-            idleReg     <= 0;
-        end else if (idleCounter < 2 * (prescale << 3) - 1) begin
-            /* 计算空闲状态的时间 */
-            idleCounter <= idleCounter + 1;
-            idleReg     <= 0;
-        end else if (idleCounter == 2 * (prescale << 3) - 1) begin
-            /* 如果空闲状态时间超过一个bit的持续时间，认为是空闲状态 */
-            idleReg <= 1;
-        end
-    end
-
-
-endmodule
-
-                        </code></pre>
-                    </div>
-
-                    <p class="text">
-                        UART-RX模块有两个时序逻辑，分别用于接收串口时候的TTL电平采样并接收数据以及根据接收状态判断是否是空闲状态。
-                    </p>
-                    <p class="text">
-                        串口数据接收的逻辑中，在没有复位的情况下，先判断 <code class="intext">prescaleReg</code>是否是空的。如果有值则继续减一计数，等待完成。如果已经完成计数，则会根据
-                        <code class="intext">bitCnt</code>判断当前是否有数据位需要处理。
-                        <code class="intext">bitCnt</code>中如果也是空的，并且检测到了接收引脚上有上升沿，说明当前处于新数据帧接收的开始。于是开始初始化各个寄存器，先装填分频计数寄存器，装填的大小为半个bit接收的时间，用于之后的中点位置的电平采样。也就是将会先延迟0.5个波特周期。并且会将<code
-                            class="intext">bitCnt</code>装填为 <code class="intext">DATA_WIDTH + 2</code>
-                        ，这是因为除了数据位需要接收之外，还需要处理起始位与结束位的判断。当完成半个bit周期的延时之后，开始进行电平采样，这时候如果发现采样的电平不是低电平，说明起始位是错误的，将之前配置的寄存器清空进行复位。如果检测到
-                        <code class="intext">rxd</code>正是
-                        低电平，符合一个起始位的电平特征，于是继续 <code class="intext">rxd</code>的电平采样，并且给分频计数器装填1个bit的计数值，由于当前处于一个bit周期的中间，因此每次装填1个周期计时完成之后都是在数据位的中点处进行采样。当分频计数器完成计数，开始进行中点的电平采样，并且重新装填
-                        <code class="intext">prescaleReg</code>与 <code class="intext">bitCnt</code>。
-                        完成所有数据位的接收之后开始进行停止位的判断，即判断 <code class="intext">bigCnt</code>是否为1。在
-                        <code class="intext">bitCnt == 1</code>的时候进行 <code class="intext">rxd</code>上的电平采样，如果是高电平，符合停止位的电平协议，输出数据寄存器的值到缓冲区中，并且将
-                        <code class="intext">rValid</code>拉高说明完成了一次接收。如果不是，说明帧错误。
-                    </p>
-
-                    <p class="text">
-                        对于ORE的判断，则是通过上一次的 <code class="intext">rValid</code>与 <code
-                            class="intext">rReady</code>。如果 <code class="intext">rValid</code>与 <code class="intext">rReady</code>同时拉高，说明上层已经处理完成数据并且准备好接受新的数据，模块会将
-                        <code class="intext">rValid</code>拉低直到下一个新的数据到来。如果 <code
-                            class="intext">rValid</code>
-                        一直都是高电平，<code class="intext">ore</code>信号在数据帧接收完成之后也会被赋给高电平，说明出现了数据溢出的错误。
-                    </p>
-                    <p class="text">
-                        串口空闲的判断则是通过 <code class="intext">busy</code>信号判断，如果为低，说明当前没有在处理数据接收事务，但是有可能是在下一个字节处理的间隙，因此需要进行计时，通过等待两个字节的时间，判断是否真的没有下一个字节数据发送过来。如果成立，拉高
-                        <code class="intext">idle</code>信号表示当前窗口为空闲状态。
-                    </p>
-                </div>
-            </div>
-            <div class="section-tailer"></div>
         </div>
 
         <div class="section-background" id="section-6">
-            <div class="section-header"><div class="section-number">06</div></div>
+            <div class="section-header">
+                <div class="section-number">03</div>
+            </div>
             <div class="wrap-section" id="paragraph-6">
                 <h1 class="section-title">状态管理</h1>
 
@@ -1368,7 +415,7 @@ endmodule
                         FSM模块是整个系统的核心控制单元，负责统一管理按键事件、串口命令解析、系统运行状态以及状态信息的串口反馈。
                         该模块通过状态机的方式，对来自不同输入源（按键与 UART）的控制指令进行仲裁与处理，并将最终的控制结果以清晰、稳定的接口形式输出给
                         LED 控制模块和Tick模块。
-                        从系统结构上看，FSM 模块位于功能调度层，不直接驱动外设，而是通过输出 mode、suspend 和 periodMs
+                        从系统结构上，FSM 模块位于功能调度层，不直接驱动外设，而是通过输出 mode、suspend 和 periodMs
                         等状态信号，对下层功能模块进行统一配置，从而实现逻辑解耦和职责划分。
                         FSM 模块主要完成以下功能：
                     </p>
@@ -1389,72 +436,91 @@ endmodule
                             MODE=n,RUN 或 MODE=n,PAUSE 形式的状态字符串
                         </li>
                     </ol>
+                    <div class="wrap-interface input">
+                        <div class="box-interface">
+                            <div class="key">clk</div>
+                            <div class="value"><p class="value-text">系统主时钟输入，用于驱动
+                                FSM 的状态转移、计数逻辑以及串口控制时序。</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">rst</div>
+                            <div class="value"><p class="value-text">高有效复位信号，用于初始化
+                                FSM
+                                状态、模式参数及所有内部寄存器，确保系统上电或复位后处于确定状态。</p></div>
+                        </div>
 
-                    <p class="text">
-                        接口定义如下:
-                    </p>
+                        <div class="box-interface">
+                            <div class="key" style="width: 110px;">changeEvent</div>
+                            <div class="value"><p class="value-text" style="width: 400px; margin: 10px 0 10px 50px">
+                                模式切换事件输入信号，为单周期有效脉冲。
+                                每次有效触发时，FSM 在模式 0、1、2 之间循环切换。</p></div>
+                        </div>
 
-                    <ul>
-                        <li>时钟与复位接口
-                            <ul>
-                                <li><code class="intext" style="color: blue;">clk</code> <br/>系统主时钟输入，用于驱动
-                                    FSM 的状态转移、计数逻辑以及串口控制时序。
-                                </li>
-                                <li><code class="intext" style="color: blue;">rst</code> <br/> 高有效复位信号，用于初始化
-                                    FSM
-                                    状态、模式参数及所有内部寄存器，确保系统上电或复位后处于确定状态。
-                                </li>
-                            </ul>
-                        </li>
-                        <li>按键事件接口
-                            <ul>
-                                <li><code class="intext" style="color: blue;">changeEvent</code> <br/>模式切换事件输入信号，为单周期有效脉冲。
-                                    每次有效触发时，FSM 在模式 0、1、2 之间循环切换。
-                                </li>
-                                <li><code class="intext" style="color: blue;">suspendEvent</code> <br/>暂停 /
-                                    继续事件输入信号，为单周期有效脉冲。
-                                    每次触发时，FSM 翻转当前运行状态，实现暂停与恢复功能。
-                                </li>
-                            </ul>
-                        </li>
-                        <li>UART接收接口
-                            <ul>
-                                <li><code class="intext" style="color: blue;">rValid</code> <br/>UART 接收数据有效信号，表示当前
-                                    <code class="intext">dataIn</code> 中的数据为新接收到的有效字节。
-                                </li>
-                                <li><code class="intext" style="color: blue;">rReady</code> <br/> UART 接收准备完成信号，由
-                                    FSM 输出，用于指示当前模块可以继续接收串口数据。
-                                </li>
-                                <li><code class="intext" style="color: blue;">dataIn</code> <br/>UART 接收的 8 位 ASCII
-                                    数据的缓冲区，用于解析模式切换、暂停控制、调速与查询命令。
-                                </li>
-                                <li><code class="intext" style="color: blue;">idle</code> <br/>UART
-                                    空闲指示信号，用于判断一帧指令是否接收完成，是串口协议状态机的重要判定条件。
-                                </li>
-                            </ul>
-                        </li>
-                        <li>UART发送接口
-                            <ul>
-                                <li><code class="intext" style="color: blue;">tValid</code> <br/> UART 发送使能信号，由
-                                    FSM 控制，在需要发送状态反馈时拉高。
-                                </li>
-                                <li><code class="intext" style="color: blue;">tReady</code> <br/> UART
-                                    发送准备完成信号，用于与发送模块进行握手，确保数据在正确时序下发送。
-                                </li>
-                                <li><code class="intext" style="color: blue;">dataOut</code> <br/> UART
-                                    发送数据输出缓冲区，用于逐字节输出状态字符串。
-                                </li>
-                            </ul>
-                        </li>
-                        <li>系统状态输出接口
-                            <ul>
-                                <li><code class="intext" style="color: blue;">mode</code> <br/> LED流水模式</li>
-                                <li><code class="intext" style="color: blue;">suspend</code> <br/> 暂停信号</li>
-                                <li><code class="intext" style="color: blue;">periodMs</code> <br/> LED的切换时钟信号分频系数
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+                        <div class="box-interface">
+                            <div class="key" style="width: 110px;">suspendEvent</div>
+                            <div class="value"><p class="value-text" style="width: 400px; margin: 10px 0 10px 50px;">暂停
+                                /
+                                继续事件输入信号，为单周期有效脉冲。
+                                每次触发时，FSM 翻转当前运行状态，实现暂停与恢复功能。</p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">rValid</div>
+                            <div class="value"><p class="value-text">UART 接收数据有效信号，表示当前
+                                <code class="intext">dataIn</code> 中的数据为新接收到的有效字节。</p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">dataIn</div>
+                            <div class="value"><p class="value-text">UART 接收的 8 位 ASCII
+                                数据的缓冲区，用于解析模式切换、暂停控制、调速与查询命令。</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">idle</div>
+                            <div class="value"><p class="value-text">UART
+                                空闲指示信号，用于判断一帧指令是否接收完成，是串口协议状态机的重要判定条件。</p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">tReady</div>
+                            <div class="value"><p class="value-text">UART
+                                发送准备完成信号，用于与发送模块进行握手，确保数据在正确时序下发送。</div>
+                        </div>
+
+                    </div>
+
+                    <div class="wrap-interface output">
+                        <div class="box-interface">
+                            <div class="key">rReady</div>
+                            <div class="value"><p class="value-text"> UART 接收准备完成信号，由
+                                FSM 输出，用于指示当前模块可以继续接收串口数据。</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">tValid</div>
+                            <div class="value"><p class="value-text">UART 发送使能信号，由
+                                FSM 控制，在需要发送状态反馈时拉高。</div>
+                        </div>
+
+
+                        <div class="box-interface">
+                            <div class="key">dataOut</div>
+                            <div class="value"><p class="value-text">UART
+                                发送数据输出缓冲区，用于逐字节输出状态字符串。</div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">mode</div>
+                            <div class="value"><p class="value-text">LED流水模式</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">suspend</div>
+                            <div class="value"><p class="value-text">暂停信号</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">periodMs</div>
+                            <div class="value"><p class="value-text">LED的切换时钟信号分频系数</p></div>
+                        </div>
+                    </div>
+
 
                     <div class="wrap-code-segment">
                         <pre class="line-numbers"><code class="lang-verilog">
@@ -1720,15 +786,12 @@ module fsm #(
                             state   <= PROTOCOL_STATE_SPEED;
                             calcReg <= calcReg * 10 + (dataIn - "0");
                         end
-
                         /* 进入请求模式 */
                         if (dataIn == pattern[0]) begin
                             state      <= PROTOCOL_STATE_REQUEST;
                             match      <= 0;
                             matchIndex <= 1;
                         end
-
-
                     end
 
                     /* 调速状态 */
@@ -1741,7 +804,6 @@ module fsm #(
                             /* 调整为错误状态 */
                             state   <= PROTOCOL_STATE_ERROR;
                         end
-
                     end
 
                     /* 询问状态 */
@@ -1797,7 +859,6 @@ module fsm #(
             if (state == PROTOCOL_STATE_RESPONSE) begin
                 state <= PROTOCOL_STATE_IDLE;
             end
-
             /* 当接收完整帧之后，再恢复到空闲状态 */
             if (state == PROTOCOL_STATE_ERROR && idle) begin
                 state <= PROTOCOL_STATE_IDLE;
@@ -1905,19 +966,49 @@ endmodule
                         一部分信号虽然是 <code class="intext">output</code>但是并没有设定成 <code
                             class="intext">reg</code>，而是定义为 <code class="intext">wire</code>类型，通过内部的 <code
                             class="intext">reg</code>类型的信号控制 <code class="intext">output wire</code>。这样做可以通过组合逻辑方便后面的修改与扩展而不需要改动接口。
-
                     </p>
                     <p class="text">
                         FSM模块主要是用来做上层的状态转移的逻辑判断。FSM模块不仅需要解析上层的查询指令"State of
                         you"，与调速指令"Sxxx"等等，并且需要准备向上位机发送的串口字符。FSM模块通过定义 <code
-                            class="intext">PROTOCOL_STATE_IDLE </code> , <code
-                            class="intext">PROTOCOL_STATE_S_MODE </code> , <code
-                            class="intext">PROTOCOL_STATE_SPEED </code> , <code
-                            class="intext">PROTOCOL_STATE_REQUEST </code> , <code
-                            class="intext">PROTOCOL_STATE_RESPONSE </code> , <code
-                            class="intext">PROTOCOL_STATE_ERROR </code> 几个参数用于状态的索引。将"State of
-                        you"几个字符作为常量存储在 <code class="intext">pattern</code>数组中。协议发送方面定义了 <code
-                            class="intext">TRANSMIT_STATE_IDLE </code>, <code class="intext">TRANSMIT_STATE_MODE </code>,
+                            class="intext">PROTOCOL_STATE_IDLE</code> , <code
+                            class="intext">PROTOCOL_STATE_S_MODE</code> , <code
+                            class="intext">PROTOCOL_STATE_SPEED</code> , <code
+                            class="intext">PROTOCOL_STATE_REQUEST</code> , <code
+                            class="intext">PROTOCOL_STATE_RESPONSE</code> , <code
+                            class="intext">PROTOCOL_STATE_ERROR</code> 几个参数用于状态的索引。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                            /* 状态常量 */
+    localparam PROTOCOL_STATE_IDLE      = 0;
+    localparam PROTOCOL_STATE_S_MODE    = 1;
+    localparam PROTOCOL_STATE_SPEED     = 2;
+    localparam PROTOCOL_STATE_REQUEST   = 3;
+    localparam PROTOCOL_STATE_RESPONSE  = 4;
+    localparam PROTOCOL_STATE_ERROR     = 5;
+                    </code></pre>
+                    <p class="text">
+                        将"State of
+                        you"几个字符作为常量存储在 <code class="intext">pattern</code>数组中。在进行命令解析的时候会通过索引寄存器依次判断数组中提前存储的字符模式是否与串口接受到的命令字符相一致的方式进行命令判断。
+                    </p>
+
+                    <pre class="line-numbers"><code class="lang-verilog">
+                            /* 模式字符串 */
+    reg [7:0] modeString[0:MODE_VALUE_LEN - 1];
+
+    initial begin
+        modeString[0] = "M";
+        modeString[1] = "O";
+        modeString[2] = "D";
+        modeString[3] = "E";
+        modeString[4] = "=";
+        modeString[5] = "n";
+        modeString[6] = ",";
+    end
+                    </code></pre>
+
+                    <p class="text">
+                        协议发送方面定义了 <code
+                            class="intext">TRANSMIT_STATE_IDLE</code>, <code class="intext">TRANSMIT_STATE_MODE</code>,
                         <code class="intext">TRANSMIT_STATE_PAUSE </code>, <code
                             class="intext">TRANSMIT_STATE_RUN</code> 几个参数用于发送参数的状态索引，并且将发送需要的字符串存入到数组
                         <code class="intext">modeString</code>, <code class="intext">runStateString</code>, <code
@@ -1928,19 +1019,67 @@ endmodule
                         控制LED状态与接收状态转移的部分工作流程如下：
                         在判断复位信号无效之后判断是否是暂停状态，如果正在运行而不是暂停，则循环检测模式更改事件的上升沿与串口接收信号。前者用于循环递增模式变量，后者用于解析缓冲区数据并根据数据更改模式变量。在这之后还会轮询暂停事件，如果被触发，翻转暂停状态信号
                         <code class="intext">suspend</code>，完成暂停状态与运行状态之间的切换。
+
                         后面的逻辑则是串口消息的解析。从普通的IDLE空闲状态开始，如果接收到了数字或者"P",
                         "R"等直接进行单字节流处理，不需要进行状态的转移。但是如果接收到了"S"，说明之后的指令是多字节指令，需要进行状态转移。由于调速指令"Sxxxx"与询问指令"State
                         of you"都是S为前缀，因此需要额外设置一个S_MODE用于中间状态，接收到"S"字符之后就会转移到这个状态。在S状态下会继续检测之后的字符。如果之后的字符不是数字也不是"State
-                        of
-                        you"这个指令，接收状态会从S_MODE跳转到ERROR。如果第二个字符是数字，则跳转到SPEED状态用于调速指令的解析。如果是"t"则会跳转到REQUEST模式下进行协议解析和判断。这两个状态在一帧数据包发送完之前会持续检测。SPEED状态会一直检测是否是数字，REQUEST模式会一直检测是否符合"State
-                        of
-                        you"这个指令，直到UART接收模块将串口空闲信号拉高，说明当前数据包接收完成，并且这个数据包从开始到结束没有出现错误字符或者多余字符的情况下判定协议解析成功。如果在接收到串口空闲信号之前，SPEED状态下接收到了非数字或者REQUEST状态下接收到了"State
+                        of you"这个指令，接收状态会从S_MODE跳转到ERROR。如果第二个字符是数字，则跳转到SPEED状态用于调速指令的解析。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                                            /* S 模式 */
+                    PROTOCOL_STATE_S_MODE: begin
+                        /* 进入调速模式 */
+                        if (dataIn >= "0" && dataIn <= "9") begin
+                            state   <= PROTOCOL_STATE_SPEED;
+                            calcReg <= calcReg * 10 + (dataIn - "0");
+                        end
+                        /* 进入请求模式 */
+                        if (dataIn == pattern[0]) begin
+                            state      <= PROTOCOL_STATE_REQUEST;
+                            match      <= 0;
+                            matchIndex <= 1;
+                        end
+                    end
+                    </code></pre>
+                    <p class="text">
+                        如果是"t"则会跳转到REQUEST模式下进行协议解析和判断。这两个状态在一帧数据包发送完之前会持续检测。SPEED状态会一直检测是否是数字，REQUEST模式会一直检测是否符合"State
+                        of you"这个指令，直到UART接收模块将串口空闲信号拉高，说明当前数据包接收完成，并且这个数据包从开始到结束没有出现错误字符或者多余字符的情况下判定协议解析成功。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                           /* 调速状态， 并且帧全部接收完成，处于串口空闲状态 */
+            if (state == PROTOCOL_STATE_SPEED && idle) begin
+                /* 回到协议的空闲状态 */
+                state     <= PROTOCOL_STATE_IDLE;
+                periodReg <= `GET_MAX_COUNT(CLK_FREQ, calcReg);
+                calcReg   <= 0;
+            end
+
+                    </code></pre>
+                    <p class="text">
+
+
+                        如果在接收到串口空闲信号之前，SPEED状态下接收到了非数字或者REQUEST状态下接收到了"State
                         of you"以外的字符或者顺序没有严格符合。两个状态都会跳转到ERROR状态，ERROR状态则会在串口空闲信号拉高之后回到
                         IDLE状态。
                         如果向芯片发送的正确调速数据包，状态机进入SPEED模式会逐字节处理这些数字字符，将其从ASCII码转为数字，并且将其缓存进
                         <code class="intext">calcReg</code>寄存器中。等接收到下一个数字之后，将 <code class="intext">calcReg</code>寄存器缓存的值乘十，再加上新的数字，这样完成10进制调速协议的数字解析。SPEED状态下等到串口空闲信号之后通过
                         <code class="intext">GET_MAX_COUNT</code>宏计算出在当前系统时钟频率与接收到的LED闪烁周期（ms）的条件下的Tick模块的分频系数。并将其存入
                         <code class="intext">periodMsReg</code>寄存器中，输出到Tick模块。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                                        /* 调速状态 */
+                    PROTOCOL_STATE_SPEED: begin
+                        if (dataIn >= "0" && dataIn <= "9") begin
+                            calcReg <= calcReg * 10 + (dataIn - "0");
+                        end else begin
+                            /* 复位 */
+                            calcReg <= 0;
+                            /* 调整为错误状态 */
+                            state   <= PROTOCOL_STATE_ERROR;
+                        end
+                    end
+                    </code></pre>
+                    <p class="text">
                         如果向芯片发送"State of
                         you"，状态机进入到REQUEST模式，芯片会不断检索字符是否符合预设命令，每次比较完成之后将索引值自增。其中遇到错误就会将索引值直接清空复位。如果一直到串口空闲都没有出现问题，则会将状态转移到PROTOCOL_STATE_RESPONSE一个时钟周期之后回到接收空闲状态。
                         发送逻辑则会检测接收状态是否触发 <code class="intext">PROTOCOL_STATE_RESPONSE</code>状态，如果触发了一次这个状态并且当前的发送逻辑处于空闲状态，将会将发送状态从空闲转移到
@@ -1959,19 +1098,1301 @@ endmodule
             <div class="section-tailer"></div>
         </div>
 
+        <div class="section-background" id="section-4">
+            <div class="section-header">
+                <div class="section-number">04</div>
+            </div>
+            <div class="wrap-section" id="paragraph-4">
+                <h1 class="section-title">按键处理</h1>
+                <h2 class="subsection-title">III. Key模块</h2>
+                <div class="wrap-subsection">
+                    <p class="text">
+                        key 模块用于对来自物理按键的输入信号进行同步、防抖处理，并最终输出稳定可靠的按键事件脉冲信号。
+                        由于机械按键在按下与释放过程中会产生明显的抖动现象，若直接将按键输入用于状态机或控制逻辑，易引发误触。因此，本模块通过多级同步、计数延时确认以及边沿检测的方式，对按键信号进行完整的时序处理。
+                        在本工程中，key 模块将物理按键行为抽象为单周期有效的事件信号，供系统状态机（FSM）使用，从而避免上层逻辑直接处理异步、抖动的硬件信号，降低系统复杂度。
+                    </p>
+                    <div class="wrap-interface input">
+                        <div class="box-interface">
+                            <div class="key">clk</div>
+                            <div class="value"><p class="value-text">
+                                模块的系统时钟输入信号，用于驱动按键同步寄存器、防抖计数器以及边沿检测逻辑，保证所有处理均在统一时钟域内完成。</p>
+                            </div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">rst</div>
+                            <div class="value"><p class="value-text">
+                                高有效复位信号，用于清空内部同步寄存器、计数器及历史状态寄存器，确保系统复位后按键状态处于确定初始值。</p>
+                            </div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">btn1</div>
+                            <div class="value"><p class="value-text">物理按键 1
+                                的原始输入信号，属于异步信号，可能包含抖动与毛刺，需要经过同步与防抖处理。</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">btn2</div>
+                            <div class="value"><p class="value-text">物理按键 2 的原始输入信号，处理流程与
+                                btn1 完全一致。</p></div>
+                        </div>
+                    </div>
+                    <div class="wrap-interface output">
+                        <div class="box-interface">
+                            <div class="key">key1</div>
+                            <div class="value"><p class="value-text">按键 1 的防抖后事件输出信号。当检测到
+                                btn1
+                                状态由低变高并稳定保持超过设定防抖时间后，输出一个单时钟周期宽度的上升沿脉冲，用于触发上层控制逻辑。</p>
+                            </div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">key2</div>
+                            <div class="value"><p class="value-text">按键 2 的防抖后事件输出信号，输出形式与
+                                key1 相同，同样为单周期有效的上升沿脉冲信号。</p></div>
+                        </div>
+                    </div>
+
+                    <div class="wrap-code-segment">
+                    <pre class="line-numbers"><code class="lang-verilog">
+`timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    key.v
+ * @brief   按键模块，用于处理按键电平并产生事件
+ *******************************************************************************
+ * @attention
+ *
+ * none
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clk:     系统时钟信号
+ * (+) rst:     复位信号，高电平有效
+ * (+) btn1:    物理按键引脚1
+ * (+) btn2:    物理按键引脚2
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) key1:    物理按键1触发事件，上升沿有效
+ * (+) key2:    物理按键2触发事件，上升沿有效
+ *
+ *******************************************************************************
+ * @author  杨紫翔
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+module key (
+    input wire clk,
+    input wire rst,   // 高有效复位
+    input wire btn1,
+    input wire btn2,
+
+    output reg key1,  // 防抖后的上升沿脉冲
+    output reg key2
+);
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    parameter integer DEBOUNCE_CNT = 500_000;  // 10ms @125MHz
+
+
+    reg btn1_ff1, btn1_ff2;
+    reg btn2_ff1, btn2_ff2;
+
+    reg [$clog2(DEBOUNCE_CNT):0] cnt1;
+    reg [$clog2(DEBOUNCE_CNT):0] cnt2;
+
+
+    reg btn1_stable;
+    reg btn2_stable;
+
+    reg btn1_last;
+    reg btn2_last;
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            btn1_ff1 <= 1'b0;
+            btn1_ff2 <= 1'b0;
+            btn2_ff1 <= 1'b0;
+            btn2_ff2 <= 1'b0;
+        end else begin
+            btn1_ff1 <= btn1;
+            btn1_ff2 <= btn1_ff1;
+            btn2_ff1 <= btn2;
+            btn2_ff2 <= btn2_ff1;
+        end
+    end
+
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            cnt1        <= 0;
+            cnt2        <= 0;
+            btn1_stable <= 1'b0;
+            btn2_stable <= 1'b0;
+        end else begin
+            // ---- btn1 ----
+            if (btn1_ff2 == btn1_stable) cnt1 <= 0;
+            else if (cnt1 < DEBOUNCE_CNT) cnt1 <= cnt1 + 1'b1;
+            else begin
+                cnt1        <= 0;
+                btn1_stable <= btn1_ff2;
+            end
+
+            // ---- btn2 ----
+            if (btn2_ff2 == btn2_stable) cnt2 <= 0;
+            else if (cnt2 < DEBOUNCE_CNT) cnt2 <= cnt2 + 1'b1;
+            else begin
+                cnt2        <= 0;
+                btn2_stable <= btn2_ff2;
+            end
+        end
+    end
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            btn1_last <= 1'b0;
+            btn2_last <= 1'b0;
+            key1      <= 1'b0;
+            key2      <= 1'b0;
+        end else begin
+            key1 <= (~btn1_last) & btn1_stable;  // 上升沿
+            key2 <= (~btn2_last) & btn2_stable;
+
+            btn1_last <= btn1_stable;
+            btn2_last <= btn2_stable;
+        end
+    end
+
+endmodule
+
+                    </code></pre>
+                    </div>
+
+                    <p class="text">
+                        模块定义了一个局部参数 <code class="intext">DEBOUNCE_CNT</code>用于记录按键的有效时间。这个局部参数不能被上层修改。
+                    </p>
+                    <p class="text">
+                        通过系统函数 <code class="intext">$clog2(DEBOUNCE_CNT)</code>自动计算出用于延时的计数器需要的位数。
+                    </p>
+                    <p class="text">
+                        Key模块主要由三个时序逻辑组成
+                    </p>
+                    <p class="text">
+                        第一个时序逻辑负责判断复位信号以及两级按键电平的状态保存。
+                        第二个时序中，如果 <code class="intext">ff2</code> <code class="intext">stable</code>相等，意味着已经重新开始一次新的触发，开始
+                        <code class="intext">cnt</code>数器的计数，直至达到预设延时时间，在这期间如果 <code
+                            class="intext">ff2</code>因为抖动重新回到了上一个电平状态则判定为是硬件抖动，将会将计数器
+                        <code
+                                class="intext">cnt</code>清空，重新准备计时。如果稳定地等到了计数完成，则认为是一次有效的电平转换，重新改变
+                        <code class="intext">stable</code>的值并清空<code class="intext">cnt</code>准备下一次的计数。
+                        第三个时序负责初始事件输出与物理按键电平之间的关系。通过不断检测 <code
+                            class="intext">stable</code> <code class="intext">last</code>值判断是否产生上升沿。如果存在上升沿则拉高
+                        <code class="intext">key</code>，输出按键事件脉冲，随后拉低 <code class="intext">key</code>
+                    </p>
+                </div>
+            </div>
+            <div class="section-tailer"></div>
+        </div>
+
+        <div class="section-background" id="section-5">
+            <div class="section-header">
+                <div class="section-number">05</div>
+            </div>
+            <div class="wrap-section" id="paragraph-5">
+                <h1 class="section-title">UART控制</h1>
+                <h2 class="subsection-title">V. UART-TX模块</h2>
+                <div class="wrap-subsection">
+                    <p class="text">
+                        UART-TX模块主要是用于在接收到使能信号之后将8位数据寄存器内的数据以UART的方式发送出去。并且在发送过程中拉低状态信号表示忙碌，在发送完成之后拉高状态信号通知其他上层模块,模块
+                        暴露的接口有
+                    </p>
+                    <div class="wrap-interface input">
+                        <div class="box-interface">
+                            <div class="key">clk</div>
+                            <div class="value"><p class="value-text">用于时序逻辑的时钟</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">rst</div>
+                            <div class="value"><p class="value-text">复位信号</p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">tReady</div>
+                            <div class="value"><p class="value-text">
+                                状态信号，拉高表示处于准备发送数据的状态，拉低表示当前正在发送事务中</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">prescale</div>
+                            <div class="value"><p class="value-text">
+                                分频系数，用于控制发送时候的单bit时间宽度，从而控制UART发送的波特率</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">busy</div>
+                            <div class="value"><p class="value-text">用于表示忙碌状态的信号</p></div>
+                        </div>
+
+                    </div>
+                    <div class="wrap-interface output">
+                        <div class="box-interface">
+                            <div class="key">tData</div>
+                            <div class="value"><p class="value-text">
+                                数据缓冲区，使能之后，将缓冲区内的数据存入寄存器中发送</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">tValid</div>
+                            <div class="value"><p class="value-text">
+                                发送使能信号，当信号出现一个周期的高电平脉冲之后触发模块开始数据发送</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">txd</div>
+                            <div class="value"><p class="value-text">发送使用的引脚，串口的发送引脚</p></div>
+                        </div>
+                    </div>
+
+
+                    <div class="wrap-code-segment">
+                        <pre class="line-numbers"><code class="lang-verilog">
+`timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    uart-tx.v
+ * @brief   用于将数据寄存器中的数据通过txd发送出去
+ *******************************************************************************
+ * @attention
+ *
+ * tValid使能信号只能拉高一个时钟周期，不能持续拉高
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clk:     系统时钟信号
+ * (+) rst:     复位信号，高电平有效
+ * (+) tData:   发送数据
+ * (+) tValid:  发送使能信号
+ * (+) prescale:波特率分频系数
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) txd:     串口发送引脚
+ * (+) tReady:  发送准备完成
+ * (+) busy:    忙碌状态信号
+ *
+ *******************************************************************************
+ * @author  李牧泽
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+module uartTx #(
+    parameter DATA_WIDTH = 8
+) (
+    input  wire                  clk,
+    input  wire                  rst,
+    /* input */
+    input  wire [DATA_WIDTH-1:0] tData,
+    input  wire                  tValid,
+    output wire                  tReady,
+    /* UART Interface */
+    output wire                  txd,
+    input  wire [          31:0] prescale,
+    output wire                  busy
+);
+
+
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    reg tReadyReg = 0;
+    reg txdReg = 0;
+    reg busyReg = 0;
+    reg [DATA_WIDTH:0] dataReg = 0;
+    reg [31:0] prescaleReg = 0;
+    reg [3:0] bitCnt = 0;
+
+
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+    assign tReady = tReadyReg;
+    assign txd    = txdReg;
+    assign busy   = busyReg;
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            tReadyReg    <= 0;
+            txdReg      <= 1;
+            prescaleReg <= 0;
+            bitCnt      <= 0;
+            busyReg     <= 0;
+        end else begin
+            if (prescaleReg > 0) begin
+
+                tReadyReg    <= 0;
+                prescaleReg <= prescaleReg - 1;
+
+            end else if (bitCnt == 0) begin
+                tReadyReg <= 1;
+                busyReg  <= 0;
+
+                // 逻辑起始
+                if (tValid) begin
+
+                    tReadyReg    <= !tReadyReg;
+                    prescaleReg <= (prescale << 3) - 1;
+                    bitCnt      <= DATA_WIDTH + 1;
+                    dataReg     <= {1'b1, tData};
+                    txdReg      <= 0;
+                    busyReg     <= 1;
+                end
+            end else begin
+                if (bitCnt > 1) begin
+
+                    bitCnt            <= bitCnt - 1;
+                    prescaleReg       <= (prescale << 3) - 1;
+                    {dataReg, txdReg} <= {1'b0, dataReg};
+
+                end else if (bitCnt == 1) begin
+
+                    bitCnt      <= bitCnt - 1;
+                    prescaleReg <= (prescale << 3);
+                    txdReg      <= 1;
+
+                end
+            end
+        end
+    end
+
+
+endmodule
+
+                        </code></pre>
+                    </div>
+
+                    <p class="text">
+                        发送模块没有使用特殊的状态寄存器用于记录串口发送事务的状态转移，而是通过计数的方式自然完成分频与8bit电平发送。
+                    </p>
+                    <p class="text">
+                        <code class="intext">prescaleReg</code>就是用于分频的计数寄存器，<code
+                            class="intext">prescaleReg</code>的时候，并且开没有开始一次发送事务(即 <code class="intext">bitCnt</code>为零),会持续检测
+                        <code class="intext">tValid</code>信号。如果 <code class="intext">tValid</code>被拉高，模块开始一次发送事务
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                                        if (tValid) begin
+
+                    tReadyReg    <= !tReadyReg;
+                    prescaleReg <= (prescale << 3) - 1;
+                    bitCnt      <= DATA_WIDTH + 1;
+                    dataReg     <= {1'b1, tData};
+                    txdReg      <= 0;
+                    busyReg     <= 1;
+                end
+                    </code></pre>
+                    <p class="text">
+                        进入发送事务首先会开始各种参数的初始化，会将 <code class="intext">tReady</code>信号拉低，表示当前不可开始下一次发送事务，并且开始将分频计数装填到
+                        <code class="intext">prescaleReg</code>中，<code class="intext">bitCnt</code>中存入一次发送事务需要的电平翻转数量，一般是8bit加上一个起始位。并且发送数据被装填到数据寄存器<code
+                            class="intext">dataReg</code>中。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+end else if (bitCnt == 0) begin
+    tReadyReg <= 1;
+    busyReg  <= 0;
+
+                    </code></pre>
+                    <p class="text">
+                        <code class="intext">prescaleReg</code>在被装填上分频计数值之后会持续自减，直到归零，并且 <code
+                            class="intext">bitCnt</code>当前不为零，因此会进入发送逻辑， <code
+                            class="intext">bitCnt</code>首先减一，表示完成一位发送，重新装填分频计数器 <code
+                            class="intext">prescaleReg</code>，将数据寄存器 <code class="intext">dataReg</code>中的最低位移出到
+                        <code class="intext">txdReg</code>中，用于控制发送引脚电平。
+                        如果当前的 <code class="intext">bitCnt</code>已经减到1，说明完成所有的数据发送，这时完成重装填之后会将
+                        <code class="intext">txdReg</code>拉高表示停止位。
+                    </p>
+
+                    <p class="text">
+                        当 <code class="intext">prescaleReg</code>与 <code class="intext">bitCnt</code>全部归零之后表示一次发送事务完成，此时模块将
+                        <code class="intext">tReadyReg</code>置位，表示当前可以开始下一次的发送事务。
+                    </p>
+                </div>
+                <h2 class="subsection-title">VI. UART-RX模块</h2>
+                <div class="wrap-subsection">
+                    <p class="text">
+                        UART-RX模块用于串口接收引脚的电平采样，通过8倍过采样检测电平数据，并将采样得到的数据记录到数据缓冲区中，除此之外，接收模块还会通过一些信号向上层发送状态，比如接收事务处理状态，空闲状态，帧错误与帧溢出错误。
+                    </p>
+                    <div class="wrap-interface input">
+                        <div class="box-interface">
+                            <div class="key">clk</div>
+                            <div class="value"><p class="value-text">用于时序逻辑的时钟</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">rst</div>
+                            <div class="value"><p class="value-text">复位信号</p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">rValid</div>
+                            <div class="value"><p class="value-text">
+                                表示一帧数据没有错误地完整接收到事件，会给上层一个高电平</p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">rxd</div>
+                            <div class="value"><p class="value-text">串口的接收引脚，模块通过采样这个引脚用于数据接收</p>
+                            </div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">prescale</div>
+                            <div class="value"><p class="value-text">
+                                波特率分频系数，用于从系统时钟中分频出某波特率下电平采样的时钟</p></div>
+                        </div>
+
+                    </div>
+                    <div class="wrap-interface output">
+
+                        <div class="box-interface">
+                            <div class="key">rData</div>
+                            <div class="value"><p class="value-text">数据接收缓冲区,用于存放接收完成的一帧数据</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">rReady</div>
+                            <div class="value"><p class="value-text">
+                                上层是否做好数据接收的准备，如果拉高模块就会认为上层已经做好了数据接收的准备</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">busy</div>
+                            <div class="value"><p class="value-text">表示正在一次串口数据接收事务中</p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">ore</div>
+                            <div class="value"><p class="value-text">Over Run
+                                Error，即数据溢出错误，当上层还没有处理完当前的数据时候新的数据接收已经完成时会拉高这个引脚表示溢出错误</p>
+                            </div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">fe</div>
+                            <div class="value"><p class="value-text">Frame Error,
+                                帧错误，当接收到的电平不符合UART协议或者波特率等原因导致过采样时候的电平突变等会拉高这个信号表示帧错误</p>
+                            </div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">idle</div>
+                            <div class="value"><p class="value-text">
+                                空闲状态，即当接收完成上一个数据之后，超过两个数据帧接受时间的空闲时，认为上层将当前若干数据帧的数据包全部发送完成，触发IDLE信号</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="wrap-code-segment">
+                        <pre class="line-numbers"><code class="lang-verilog">
+`timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    uart-rx.v
+ * @brief   在上层处理完数据之前接收信号将会一直拉高
+ *******************************************************************************
+ * @attention
+ *
+ * rValid信号为上升沿有效
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clk:     系统时钟信号
+ * (+) rst:     复位信号，高电平有效
+ * (+) rReady:  判断上层是否处理完成
+ * (+) rxd:     数据接收引脚
+ * (+) prescale:分频系数
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) rData:   数据接收缓冲区
+ * (+) rValid:  一次数据接收完成
+ * (+) busy:    处理接收事务中
+ * (+) ore:     数据溢出错误
+ * (+) fe:      帧错误
+ * (+) idle:    串口空闲事件
+ *
+ *******************************************************************************
+ * @author  李长龙
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+
+module uartRx #(
+    parameter DATA_WIDTH = 8
+) (
+                        input  wire                    clk,
+                        input  wire                    rst,
+    /*
+        output
+     */
+                        output wire [DATA_WIDTH - 1:0] rData,
+                        output wire                    rValid,
+                        input  wire                    rReady,
+    /*
+        uart interface
+     */
+                        input  wire                    rxd,
+    (* KEEP = "TRUE" *) output wire                    busy,
+                        output wire                    ore,
+                        output wire                    fe,
+                        output wire                    idle,
+                        input  wire [            31:0] prescale
+);
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    reg [DATA_WIDTH - 1:0] rDataReg = 0;
+    reg                    rValidReg = 0;
+    reg                    rxdReg = 1;
+    reg                    busyReg = 0;
+    reg                    oreReg = 0;
+    reg                    feReg = 0;
+    reg [  DATA_WIDTH-1:0] dataReg = 0;
+    reg [            31:0] prescaleReg = 0;
+    reg [             3:0] bitCnt = 0;
+    reg                    idleReg = 0;
+    reg [            31:0] idleCounter = 0;
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+    assign rData  = rDataReg;
+    assign rValid = rValidReg;
+    assign busy   = busyReg;
+    assign fe     = feReg;
+    assign ore    = oreReg;
+    assign idle   = idleReg;
+
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+
+    always @(posedge clk or posedge rst) begin
+
+        if (rst) begin
+            rDataReg    <= 0;
+            rValidReg   <= 0;
+            rxdReg      <= 0;
+            prescaleReg <= 0;
+            bitCnt      <= 0;
+            busyReg     <= 0;
+            oreReg      <= 0;
+            feReg       <= 0;
+
+        end else begin
+
+            rxdReg <= rxd;
+            oreReg <= 0;
+            feReg  <= 0;
+
+            if (rValid && rReady) begin
+                rValidReg <= 0;
+            end
+
+            // 分频计数
+            if (prescaleReg > 0) begin
+
+                prescaleReg <= prescaleReg - 1;
+
+            end else if (bitCnt > 0) begin
+
+                // 正在处理一帧
+                if (bitCnt > DATA_WIDTH + 1) begin
+
+                    // 起始位判断
+                    if (!rxdReg) begin
+                        // 帧计数-1
+                        bitCnt      <= bitCnt - 1;
+                        // 重装8倍预分频
+                        prescaleReg <= (prescale << 3) - 1;
+
+                    end else begin
+
+                        // rx线上不能为高，否则就是错误判断，伪起始位
+                        bitCnt      <= 0;
+                        prescaleReg <= 0;
+
+                    end
+
+                end else if (bitCnt > 1) begin
+
+                    // 数据位中点采样
+                    bitCnt      <= bitCnt - 1;
+                    prescaleReg <= (prescale << 3) - 1;
+                    dataReg     <= {rxdReg, dataReg[DATA_WIDTH-1:1]};
+
+                end else if (bitCnt == 1) begin
+
+                    // 停止位判断
+                    bitCnt <= bitCnt - 1;
+
+
+                    if (rxdReg) begin
+                        rDataReg  <= dataReg;
+                        rValidReg <= 1;
+                        oreReg    <= rValidReg;
+                    end else begin
+                        feReg <= 1;
+                    end
+
+                end
+            end else begin
+                // 空闲状态，等待起始位
+                busyReg <= 0;
+
+                // 检测到上升沿
+                if (!rxdReg) begin
+
+                    // 重装
+                    prescaleReg <= (prescale << 2) - 2;
+                    bitCnt      <= DATA_WIDTH + 2;
+                    dataReg     <= 0;
+                    busyReg     <= 1;
+                end
+            end
+
+        end
+    end
+
+    // 空闲状态判断，做不定长接收
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            idleCounter <= 0;
+            idleReg     <= 0;
+        end else if (busy) begin
+            idleCounter <= 0;
+            idleReg     <= 0;
+        end else if (idleCounter < 2 * (prescale << 3) - 1) begin
+            /* 计算空闲状态的时间 */
+            idleCounter <= idleCounter + 1;
+            idleReg     <= 0;
+        end else if (idleCounter == 2 * (prescale << 3) - 1) begin
+            /* 如果空闲状态时间超过一个bit的持续时间，认为是空闲状态 */
+            idleReg <= 1;
+        end
+    end
+
+
+endmodule
+
+                        </code></pre>
+                    </div>
+
+                    <p class="text">
+                        UART-RX模块有两个时序逻辑，分别用于接收串口时候的TTL电平采样并接收数据以及根据接收状态判断是否是空闲状态。
+                    </p>
+                    <p class="text">
+                        串口数据接收的逻辑中，在没有复位的情况下，先判断 <code class="intext">prescaleReg</code>是否是空的。如果有值则继续减一计数，等待完成。如果已经完成计数，则会根据
+                        <code class="intext">bitCnt</code>判断当前是否有数据位需要处理。
+                        <code class="intext">bitCnt</code>中如果也是空的，并且检测到了接收引脚上有上升沿，说明当前处于新数据帧接收的开始。于是开始初始化各个寄存器，先装填分频计数寄存器，装填的大小为半个bit接收的时间，用于之后的中点位置的电平采样。也就是将会先延迟0.5个波特周期。并且会将<code
+                            class="intext">bitCnt</code>装填为 <code class="intext">DATA_WIDTH + 2</code>
+                        ，这是因为除了数据位需要接收之外，还需要处理起始位与结束位的判断。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                                    end else begin
+                // 空闲状态，等待起始位
+                busyReg <= 0;
+
+                // 检测到上升沿
+                if (!rxdReg) begin
+
+                    // 重装
+                    prescaleReg <= (prescale << 2) - 2;
+                    bitCnt      <= DATA_WIDTH + 2;
+                    dataReg     <= 0;
+                    busyReg     <= 1;
+                end
+                    </code></pre>
+                    <p class="text">当完成半个bit周期的延时之后，开始进行电平采样，这时候如果发现采样的电平不是低电平，说明起始位是错误的，将之前配置的寄存器清空进行复位。如果检测到
+                        <code class="intext">rxd</code>正是
+                        低电平，符合一个起始位的电平特征，于是继续 <code class="intext">rxd</code>的电平采样，并且给分频计数器装填1个bit的计数值。
+                    </p>
+
+                    <pre class="line-numbers"><code class="lang-verilog">
+                                            // 起始位判断
+                    if (!rxdReg) begin
+                        // 帧计数-1
+                        bitCnt      <= bitCnt - 1;
+                        // 重装8倍预分频
+                        prescaleReg <= (prescale << 3) - 1;
+
+                    end else begin
+
+                        // rx线上不能为高，否则就是错误判断，伪起始位
+                        bitCnt      <= 0;
+                        prescaleReg <= 0;
+
+                    end
+                    </code></pre>
+                    <p class="text">
+                        由于当前处于一个bit周期的中间，因此每次装填1个周期计时完成之后都是在数据位的中点处进行采样。当分频计数器完成计数，开始进行中点的电平采样，并且重新装填
+                        <code class="intext">prescaleReg</code>与 <code class="intext">bitCnt</code>。
+                        完成所有数据位的接收之后开始进行停止位的判断，即判断 <code class="intext">bigCnt</code>是否为1。在
+                        <code class="intext">bitCnt == 1</code>的时候进行 <code class="intext">rxd</code>上的电平采样，如果是高电平，符合停止位的电平协议，输出数据寄存器的值到缓冲区中，并且将
+                        <code class="intext">rValid</code>拉高说明完成了一次接收。如果不是，说明帧错误。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                                        end else if (bitCnt > 1) begin
+
+                    // 数据位中点采样
+                    bitCnt      <= bitCnt - 1;
+                    prescaleReg <= (prescale << 3) - 1;
+                    dataReg     <= {rxdReg, dataReg[DATA_WIDTH-1:1]};
+
+                end
+                    </code></pre>
+                    <p class="text">
+                        对于ORE的判断，则是通过上一次的 <code class="intext">rValid</code>与 <code
+                            class="intext">rReady</code>。如果 <code class="intext">rValid</code>与 <code class="intext">rReady</code>同时拉高，说明上层已经处理完成数据并且准备好接受新的数据，模块会将
+                        <code class="intext">rValid</code>拉低直到下一个新的数据到来。如果 <code
+                            class="intext">rValid</code>
+                        一直都是高电平，<code class="intext">ore</code>信号在数据帧接收完成之后也会被赋给高电平，说明出现了数据溢出的错误。
+                    </p>
+                    <pre class="line-numbers"><code class="lang-verilog">
+                        else if (idleCounter < 2 * (prescale << 3) - 1) begin
+            /* 计算空闲状态的时间 */
+            idleCounter <= idleCounter + 1;
+            idleReg     <= 0;
+        end else if (idleCounter == 2 * (prescale << 3) - 1) begin
+            /* 如果空闲状态时间超过一个bit的持续时间，认为是空闲状态 */
+            idleReg <= 1;
+        end
+                    </code></pre>
+                    <p class="text">
+                        串口空闲的判断则是通过 <code class="intext">busy</code>信号判断，如果为低，说明当前没有在处理数据接收事务，但是有可能是在下一个字节处理的间隙，因此需要进行计时，通过等待两个字节的时间，判断是否真的没有下一个字节数据发送过来。如果成立，拉高
+                        <code class="intext">idle</code>信号表示当前窗口为空闲状态。
+                    </p>
+                </div>
+            </div>
+            <div class="section-tailer"></div>
+        </div>
+
+        <div class="section-background" id="section-3">
+            <div class="section-header">
+                <div class="section-number">
+                    06
+                </div>
+            </div>
+            <div class="wrap-section" id="paragraph-3">
+                <h1 class="section-title">
+                    流水灯控制
+                </h1>
+
+                <h2 class="subsection-title">I. LED模块</h2>
+                <div class="wrap-subsection">
+                    <p>LED模块一共对外暴露了六个信号接口</p>
+                    <div class="wrap-interface input">
+                        <div class="box-interface">
+                            <div class="key">clk</div>
+                            <div class="value"><p class="value-text">系统时钟，LED
+                                模块的系统同步时钟信号，用于驱动模块内部所有时序逻辑的更新</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">rst</div>
+                            <div class="value"><p class="value-text">模块复位信号，用于将
+                                LED 模块内部状态初始化至预定义的初始状态。</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">tick</div>
+                            <div class="value"><p class="value-text">LED
+                                显示状态切换的触发信号，用于指示 LED 模块在当前时钟周期执行一次显示更新操作。每当<code
+                                        class="intext">tick</code> 有效时，模块根据当前工作模式对 LED 显示状态进行更新。
+                            </p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">mode</div>
+                            <div class="value"><p class="value-text">用于指示当前 LED
+                                的流水模式，不同的模式对应不同的 LED 流水或显示策略。模块根据 <code
+                                        class="intext">mode</code>
+                                的取值选择相应的显示逻辑，并在 <code class="intext">tick</code>信号到达时更新 LED 状态。
+                            </p></div>
+                        </div>
+
+                        <div class="box-interface">
+                            <div class="key">suspend</div>
+                            <div class="value"><p class="value-text">LED
+                                显示挂起控制信号。当该信号有效时，LED 模块保持当前显示状态不变，忽略 <code
+                                        class="intext">tick</code> 信号，从而实现 LED 显示的暂停功能</p></div>
+                        </div>
+                    </div>
+
+                    <div class="wrap-interface output">
+                        <div class="box-interface">
+                            <div class="key">ledArr</div>
+                            <div class="value"><p class="value-text">led
+                                array的意思，LED 控制输出信号，用于驱动外部 LED 硬件。该信号反映 LED 模块当前内部显示状态，其取值由
+                                <code class="intext">tick</code>、<code class="intext">mode</code> 及 <code
+                                        class="intext">suspend</code>
+                                等控制信号共同决定。</p></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="wrap-code-segment ">
+                    <pre class="line-numbers"><code class="language-verilog rainbow-braces">
+`timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    led.v
+ * @brief   LED模块文件,负责LED模块的状态切换
+ *******************************************************************************
+ * @attention
+ *
+ * none
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clk:     系统时钟信号
+ * (+) rst:     复位信号，高电平有效
+ * (+) tick:    LED切换信号，上升沿有效
+ * (+) mode:    LED状态，取值[0, 1, 2]有效
+ * (+) suspend: LED切换挂起信号，高电平有效
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) ledArr:  LED控制信号输出
+ *
+ *******************************************************************************
+ * @author  张晨 & 施云峰
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+
+
+module led (
+
+    input wire clk,
+    input wire rst,
+
+    input wire       tick,
+    input wire [2:0] mode,
+    input wire       suspend,
+
+    output reg [3:0] ledArr
+);
+
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    reg lastTick;
+    reg direction;
+
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+
+    always @(posedge clk or posedge rst) begin
+
+        if (rst) begin
+
+            lastTick  <= 1'b0;
+            direction <= 1'b0;
+            ledArr    <= 4'b0000;
+
+        end else begin
+
+            if (ledArr == 4'b0000) begin
+                ledArr <= 4'b0001;
+            end
+
+            lastTick <= tick;
+
+
+            if (!suspend && (~lastTick & tick)) begin
+
+                case (mode)
+
+                    // 模式0 向左移动
+                    2'b00: begin
+                        direction <= 1;
+                        ledArr <= {
+                            ledArr[2:0],
+                            ledArr[3]
+                        };  // 循环左移
+                    end
+
+                    // 模式1 向右移动
+                    2'b01: begin
+
+                        // 最好同步调整跑马灯时候的方向设置
+                        direction <= 0;
+                        ledArr <= {
+                            ledArr[0],
+                            ledArr[3:1]
+                        };
+                    end
+
+                    // 模式2 跑马灯
+                    2'b10: begin
+
+                        ledArr <=
+                            direction
+                                ? ( {ledArr[0], ledArr[3: 1]})
+                                : ({ledArr[2: 0], ledArr[3]});
+
+
+                        direction <=
+                            (ledArr == 4'b0100)
+                                ? 1
+                                : ((ledArr == 4'b0010)
+                                    ? 0
+                                    : direction);
+
+                    end
+
+                    default: ;
+                endcase
+
+            end
+        end
+    end
+
+endmodule
+                    </code></pre>
+
+                    </div>
+                    <p class="text">
+                        LED模块的功能很清晰，就是在判断当前没有被停止的状态下，在<code class="intext">mode</code>信号的指导下，基于<code
+                            class="intext">tick</code>信号触发进行LED的状态切换。
+                        模块内有两个内部信号分别是<code class="intext">lastTick</code>与<code
+                            class="intext">direction</code>，具体功能在下文描述。
+                        时序逻辑也非常简单，最先判断<code class="intext">rst</code>复位信号是否有效，如果不是在复位状态判断<code
+                            class="intext">led</code>是否都是灭的。因为之后的所有逻辑都是通过对<code class="intext">ledArr</code>进行循环位移实现的而不是直接赋值，所以刚刚复位之后，在所有灯都是灭的时候，需要单独判断一下，并且手动直接赋值，点亮其中一颗LED。点亮之后就是通过<code
+                            class="intext">lastTick</code>内部信号与<code class="intext">tick</code>信号判断是否存在上升沿。如果有上升沿，说明该进行一次LED的状态切换。通过判断<code
+                            class="intext">mode</code>的值进入不同的控制分支。
+                    </p>
+                    <p class="text">
+                        0模式下控制LED的语句如下：
+                    </p>
+                    <pre class="line-numbers"><code class="language-verilog">ledArr <= {ledArr[2: 0], ledArr[3]}; // 循环左移</code></pre>
+
+                    <p class="text">
+                        语句可以将原本ledArr的低三位移动到高三位，并且将最高位移动到最低位，完成一次循环左移。这样的操作要比通过加减计数值判断点亮第几颗灯逻辑上更加简单，更加安全，不容易出错。1模式下进行LED右移的操作是一样的。在2模式下则需要先对
+                        <code class="intext">direction</code>进行判断， <code class="intext">direction</code>就是用来记录当前LED移动方向的变量。对于
+                        <code class="intext">direction</code>的控制则需要特殊注意：
+                    </p>
+                    <pre class="line-numbers"><code class="language-verilog">
+                        direction <=
+                            (ledArr == 4'b0100)
+                                ? 1
+                                : ((ledArr == 4'b0010)
+                                    ? 0
+                                    : direction);
+                </code></pre>
+                    <p class="text">
+                        如果当前的<code class="intext">ledArr</code>为<code class="intext">0100</code>也就是在下一次就要移动到边沿的时候就需要提前进行<code
+                            class="intext">direction</code>的改变。如果在<code class="intext">1000</code>时候再控制<code
+                            class="intext">direction</code>切换方向实际上已经迟了。因为时序逻辑的<code
+                            class="intext"><=</code>操作都是并行操作，当<code class="intext">1000</code>时修改完<code
+                            class="intext">direction</code>之后LED的切换依旧是基于旧的<code
+                            class="intext">direction</code>。因此需要在边沿的上一个LED进行<code
+                            class="intext">direction</code>从左向右的改变。当LED移动到右边沿时候同理。因此判断的时候通过两个三元操作符先后判断了当前是否是<code
+                            class="intext">0100</code>与<code class="intext">0010</code>状态而不是<code class="intext">1000</code>与<code
+                            class="intext">0001</code>。
+                        在<code class="intext">mode</code>为<code class="intext">0</code>或者<code
+                            class="intext">1</code>的时候的切换不需要依据<code class="intext">direction</code>。但是在这两个模式下的分支依然做了<code
+                            class="intext">direction</code>的赋值操作。为的是能够让LED在从0模式或者1模式切换到2模式的时候，能够保持上一个模式的状态。如果不这样做，<code
+                            class="intext">direction</code>里保持的是上一次2模式下的状态，如果上一次2模式在向右移动的时候被切换到了0模式，开始向左移动。再切换回到2模式的时候并不会继续向左，而是基于<code
+                            class="intext">direction</code>突然改变方向向右移动。因此为了让LED的移动更加顺滑，去除这些突兀的转移，在0模式与1模式中也对<code
+                            class="intext">direction</code>进行了处理。
+                    </p>
+
+                </div>
+
+                <h2 class="subsection-title">II. Tick模块</h2>
+                <div class="wrap-subsection">
+                    <p class="text">
+                        tick 模块用于在任意时钟 <code class="intext">clkIn</code> 的基础上，根据外部配置的分频系数 <code
+                            class="intext">periodMs</code>产生一个分频脉冲信号
+                        <code class="intext">clkOut</code>。
+                        该节拍信号用于驱动 LED
+                        状态更新等周期性事件，从而实现可配置周期的事件触发机制。在LED的流水切换与UART的采样上都需要用到时钟分频，本身打算都使用tick模块提供。后来UART舍弃了外部的时钟触发方式，内部自行实现采样时钟。
+
+                    </p>
+
+                    <div class="wrap-interface input">
+                        <div class="box-interface">
+                            <div class="key">clkIn</div>
+                            <div class="value"><p class="value-text">模块的时钟输入，分频之前的信号</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">rst</div>
+                            <div class="value"><p class="value-text">复位信号，清空计数寄存器</p></div>
+                        </div>
+                        <div class="box-interface">
+                            <div class="key">periodMs</div>
+                            <div class="value"><p class="value-text">32位，分频系数</p></div>
+                        </div>
+
+                    </div>
+
+                    <div class="wrap-interface output">
+                        <div class="box-interface">
+                            <div class="key">clkOut</div>
+                            <div class="value"><p class="value-text">模块的时钟输出，输出信号为以periodMs为周期的脉冲</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="wrap-code-segment">
+                        <pre class="line-numbers"><code class="lang-verilog">
+                            `timescale 1ns / 1ps
+/**
+ *******************************************************************************
+ * @file    tick.v
+ * @brief   Tick模块，用于时钟分频
+ *******************************************************************************
+ * @attention
+ *
+ * none
+ *
+ *******************************************************************************
+ * @note
+ *
+ * =============================================================================
+ *  input
+ * =============================================================================
+ *
+ * (+) clkIn:   分频前时钟
+ * (+) rst:     复位信号，高电平有效
+ * (+) preiodMs:分频系数
+ *
+ * =============================================================================
+ *  output
+ * =============================================================================
+ *
+ * (+) clkOut:  分频之后的脉冲
+ *
+ *******************************************************************************
+ * @author  张晨 & 施云峰
+ * @date    2025/12/19
+ * @version 1.0
+ *******************************************************************************
+ */
+
+
+module tick(
+    input  wire        clkIn,
+    input  wire        rst,
+    input  wire [31:0] periodMs,
+    output reg         clkOut
+);
+
+
+    /* ----------- 1. Internal Signals ---------------------------------------*/
+
+    reg [31:0] cnt;
+
+
+
+
+    /* ----------- 2. Sub-Modules --------------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 3. Combinational Logic ------------------------------------*/
+
+
+
+
+
+
+    /* ----------- 4. Sequential Logic ---------------------------------------*/
+    always @(posedge clkIn or posedge rst) begin
+
+        // 复位键按下
+        if (rst) begin
+
+            cnt    <= 0;
+            clkOut <= 1'b0;
+
+        end else if (cnt >= periodMs) begin
+
+            cnt    <= 0;
+            clkOut <= 1'b1;
+
+        end else begin
+
+            cnt    <= cnt + 1;
+            clkOut <= 1'b0;
+
+        end
+
+    end
+
+
+
+
+
+endmodule
+
+                        </code></pre>
+                    </div>
+                    <p class="text">
+                        tick模块首先判断复位信号是否有效，如果不是复位状态，则进行计数，当计数值达到periodMs之后，将脉冲输出拉高一个时钟，然后清空计数，拉低输出，开始下一个循环
+                    </p>
+                </div>
+
+
+            </div>
+            <div class="section-tailer"></div>
+        </div>
+
+        <div class="section-background">
+            <div class="section-header">
+                <div class="section-number">
+                    06
+                </div>
+            </div>
+            <div class="wrap-section">
+                <h1 class="section-title">
+                    技术总结
+                </h1>
+
+                <p class="text">
+                    通过合理的人员分工与统一的开发规范，我们自认为较为高效地完成了大作业中各项功能的模块化设计、独立开发与单元测试工作。在整体架构设计阶段，我们对系统功能进行了清晰拆分，并以模块为单位逐步实现与验证，保证了系统开发过程的可控性与可维护性。
+                </p>
+                <p class="text">
+                    在实际开发过程中，我们也遇到了诸多困难。例如，在代码综合阶段出现报错却难以及时定位具体原因，在编写
+                    Testbench 进行功能仿真时多次遭遇语法与时序问题；同时，由于对 Verilog
+                    语言特性理解不够深入，部分代码在编写初期存在一定困难，甚至出现仿真结果正确但下载到 FPGA
+                    实际运行时出现异常的情况。这些问题在一定程度上影响了开发进度，但也促使我们不断查阅资料、反复调试。
+                </p>
+                <p class="text">
+                    在解决上述问题的过程中，小组成员对 Vivado 开发环境以及 FPGA 工程的构建流程有了更加深入的理解，逐渐掌握了从
+                    RTL 编写、功能仿真到综合实现的完整开发流程。同时，我们也更加清晰地区分了哪些模块逻辑可以脱离具体硬件平台进行验证，哪些文件则用于描述
+                    FPGA 芯片的物理特性与引脚约束，为今后的 FPGA 项目开发积累了宝贵经验。
+                </p>
+
+                <p class="text">
+                    此外，在对整体设计进行回顾时，我们也发现了当前方案中仍有可改进之处。例如，FSM
+                    模块在功能划分上相对集中，将状态转移控制、命令解析与打包以及命令切换等多项功能集成在同一模块中，导致模块结构略显臃肿。事后来看，若能进一步细化功能划分，将相关逻辑拆分为多个协作模块，将更有利于系统的扩展性与后期维护。
+                </p>
+
+                <p class="text">
+                    总体而言，本次大作业不仅加深了我们对 FPGA 数字系统设计流程的理解，也锻炼了团队协作与工程化开发能力，如果之后还会接触到这些硬件系统设计，这将为我们打下良好基础。
+                </p>
+            </div>
+
+        </div>
+
     </div>
+
+    <div class="background-box">
+
+    </div>
+
 
     <div class="wrap-tailer">
-        <p><code class="segment">powered by MekLi</code></p>
-        <p><code class="segment">source on github: <a
-                href="https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report">https://github.com/MekCraft-Lab/docs-lab</a></code>
-        </p>
+        <div class="wrap-avatar"><div class="avatar">
+            <div class="wrap-logo">
+                <p>powered by MekLi</p>
+            </div>
+        </div></div>
+
+        <div class="wrap-links">
+
+            <p>html sources on github: <a
+                    href="https://github.com/MekCraft-Lab/docs-lab/tree/feature/fpga-report/fpga-report">https://github.com/MekCraft-Lab/docs-lab</a>
+            </p>
+
+            <p>
+                verilog sources on github: <a
+                    href="https://github.com/MekCraftLi/fpga-gaint-homework/tree/master"
+            >https://github.com/MekCraftLi/fpga-gaint-homework/tree/master</a>
+            </p>
+        </div>
+
     </div>
 
-    <div class="background-document"></div>
-
-    <script src="script/js/prism.js"></script>
-
 </div>
+<script src="script/js/prism.js"></script>
+
 </body>
 </html>

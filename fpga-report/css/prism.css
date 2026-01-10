@@ -34,6 +34,7 @@ pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selectio
 code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
     text-shadow: none;
     background: #b3d4fc;
+
 }
 
 pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
@@ -59,7 +60,13 @@ pre[class*="language-"] {
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
     /*background-image: linear-gradient(to left bottom, rgba(103, 2, 153, 0.1) 0, rgba(102, 2, 153, 0.05) 500px, rgba(225, 83, 98, 0.02) 70%, rgba(201, 2, 55, 0.1) 100%);*/
-    background: #fafafa;
+    /*background: #fafafa;*/
+    background: rgba(255, 255, 255);
+    border-radius: 25px;
+    box-shadow:
+            0 10px 30px rgba(0,0,0,.15);
+
+    margin: 50px 0 50px 0;
 }
 
 /* Inline code */

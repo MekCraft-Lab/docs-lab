@@ -1,9 +1,74 @@
 
 .wrap-tailer {
+    position: relative;
     width: 100%;
+    height: 300px;
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 20%, rgb(255,255,255) 80%);
 
-    .p {
-        right: 0;
-        text-align: right;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    background-image: url("../assets/img/mekanism.svg");
+    background-repeat: no-repeat;
+}
+
+.wrap-avatar {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+
+    width: 55px;
+    height: 55px;
+    background: white;
+    border-radius: 50%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+
+}
+
+.wrap-logo {
+    position: absolute;
+    top: 25px;
+    left: 30px;
+    width: 240px;
+    height: 40px;
+    background: linear-gradient(25deg , rgb(229, 191, 218), rgb(135, 130, 232));
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+    color: white;
+    z-index: -1;
+    text-align: center;
+    line-height: 10px;
+
+}
+
+.wrap-logo::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+    right: -10px;
+    width: 20px;
+    height: 100%;
+    background: white;
+    transform: skewX(-20deg);
+}
+
+.wrap-links {
+    position: absolute;
+    top: 120px;
+    left: 30px;
+
+    p {
+        background-color: white;
+        padding: 10px;
+        border-radius: 20px;
+
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
     }
 }
