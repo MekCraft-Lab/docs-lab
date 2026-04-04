@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xelatex --version)",
+      "Bash(pdflatex --version)",
+      "Bash(bibtex --version)",
+      "Bash(latexmk --version)",
+      "Bash(git:*)",
+      "Bash(where xelatex.exe)",
+      "Bash(where pdflatex.exe)",
+      "Bash(powershell -Command \"[Environment]::SetEnvironmentVariable\\('Path', [Environment]::GetEnvironmentVariable\\('Path', 'User'\\) + ';C:\\\\env\\\\texlive\\\\2025\\\\bin\\\\windows', 'User'\\)\")",
+      "Bash(export PATH=\"$PATH;C:/env/texlive/2025/bin/windows\")",
+      "Bash(\"C:/env/texlive/2025/bin/windows/xelatex.exe\" --version)",
+      "Bash(where matlab:*)",
+      "Bash(matlab -batch \"disp\\(''''MATLAB OK''''\\); ver\")",
+      "Bash(where xelatex:*)",
+      "Bash(where pdflatex:*)",
+      "Bash(where latexmk:*)",
+      "Bash(find D:/Program/MekCraft-Labs/docs-lab -name homework* -o -name hw*)",
+      "Bash(cd:*)",
+      "Bash(xelatex -interaction=nonstopmode main.tex)",
+      "Bash(matlab -batch \"run\\(''hw1_delay.m''\\)\")",
+      "Bash(matlab -batch \"cd\\(''matlab''\\); run\\(''hw1_delay.m''\\)\")",
+      "Bash(matlab -batch \"run\\(''hw1_amplitude.m''\\)\")",
+      "Bash(matlab -batch \"run\\(''hw1_phase.m''\\)\")"
+    ]
+  }
+}
